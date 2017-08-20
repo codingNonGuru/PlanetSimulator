@@ -86,7 +86,7 @@ void Voronoi::loadRandomTriangulation(int32_t width, int32_t height, uint32_t &s
 	loadSeeds(seeds);
 }
 
-void Voronoi::generate(ShaderMap& shaders, bool isDownload, container::Grid<float> &result, container::Grid<unsigned int> *finalSeeds, unsigned int relaxPassCount) {
+void Voronoi::generate(bool isDownload, container::Grid<float> &result, container::Grid<unsigned int> *finalSeeds, unsigned int relaxPassCount) {
 	clock_t start = clock();
 	int blockFactor = 16;
 	clock_t floodTime, relaxTime, allocateTime, downloadTime;
@@ -229,7 +229,7 @@ void Perlin::destroy() {
 	glDeleteBuffers(1, &streamBuffer_);
 }
 
-void Perlin::generate(ShaderMap& shaders, bool isDownload, container::Grid<float> &result, Range range, float strongestOctave, float decay, float contrast, float contrastStrength) {
+void Perlin::generate(bool isDownload, container::Grid<float> &result, Range range, float dominantOctave, float octaveDecay, float contrast, float contrastStrength) {
 	clock_t start = clock();
 	int blockFactor = 16;
 	//Bind shader and buffers
@@ -254,8 +254,8 @@ void Perlin::generate(ShaderMap& shaders, bool isDownload, container::Grid<float
 		glUniform1ui(2, order);
 		glUniform1ui(5, tier);
 		glUniform1ui(4, utility::getRandom(0, pow(2, 24)));
-		glUniform1f(7, strongestOctave);
-		glUniform1f(8, decay);
+		glUniform1f(7, dominantOctave);
+		glUniform1f(8, octaveDecay);
 		for(unsigned int stage = 0; stage < 3; ++stage) {
 			glUniform1ui(0, stage);
 			glDispatchCompute(result.getWidth() / blockFactor, result.getHeight() / blockFactor, 1);

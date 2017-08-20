@@ -5,8 +5,11 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "Buffer.hpp"
-#include "Shader.hpp"
+#include "Planet.hpp"
 #include "Transform.hpp"
+#include "Shader.hpp"
+#include "Fractal.hpp"
+#include "Texture.hpp"
 
 container::Array<glm::vec3> Renderer::positionBuffer_ = container::Array<glm::vec3>();
 container::Array<float> Renderer::scaleBuffer_ = container::Array<float>();
@@ -14,7 +17,9 @@ container::Array<float> Renderer::rotationBuffer_ = container::Array<float>();
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.05f;
+float Renderer::zoomFactor_ = 0.03f;
+
+Texture texture;
 
 void Renderer::Initialize()
 {
@@ -60,6 +65,10 @@ void Renderer::Initialize()
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	container::Grid<float> result(1024, 1024);
+	Perlin::generate(true, result, Range(0.7f, 1.0f), 2.0f, 3.0f, 0.5f, 1.0f);
+	texture.Upload(&result, GL_R32F, GL_RED, GL_FLOAT);
 }
 
 void Renderer::Draw(Scene* scene)
@@ -79,10 +88,18 @@ void Renderer::Draw(Scene* scene)
 		if(asteroid->isValid_)
 		{
 			*positionBuffer_.allocate() = asteroid->transform_->position_;
-			*scaleBuffer_.allocate() = 5.0f;
+			*scaleBuffer_.allocate() = 3.0f;
+			count++;
+		}
+	for(Planet* planet = scene->planets_.getStart(); planet != scene->planets_.getEnd(); ++planet)
+		if(planet->isValid_)
+		{
+			*positionBuffer_.allocate() = planet->transform_->position_;
+			*scaleBuffer_.allocate() = 25.0f;
 			count++;
 		}
 
+	//std::cout<<MAX_GEOMETRY_OUTPUT_VERTICES<<"\n";
 	//std::cout<<bodyBuffer_->GetKey(0)<<" "<<bodyBuffer_->GetKey(1)<<"\n";
 	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(0));
 	glBufferSubData(GL_ARRAY_BUFFER, 0, positionBuffer_.getMemorySize(), positionBuffer_.getStart());
@@ -90,6 +107,7 @@ void Renderer::Draw(Scene* scene)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, scaleBuffer_.getMemorySize(), scaleBuffer_.getStart());
 	shaderMap_->use(Shaders::BODY);
 	glUniformMatrix4fv(0, 1, GL_FALSE, &matrix_[0][0]);
+	texture.Bind(0, &shaderMap_->get(Shaders::BODY), "alpha");
 	glBindVertexArray(bodyBuffer_->GetKey());
 	glDrawArrays(GL_POINTS, 0, count);
 	glBindVertexArray(0);

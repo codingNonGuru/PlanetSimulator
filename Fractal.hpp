@@ -4,7 +4,6 @@
 
 typedef glm::vec2 Range;
 
-class ShaderMap;
 class Shader;
 
 class Voronoi {
@@ -14,7 +13,7 @@ public:
 
 	static void initialize();
 	static void destroy();
-	static void generate(ShaderMap&, bool, container::Grid<float> &, container::Grid<unsigned int> *, unsigned int);
+	static void generate(bool, container::Grid<float> &, container::Grid<unsigned int> *, unsigned int);
 	static void loadSeeds(container::Grid<unsigned int> &);
 	static void loadRandomTriangulation(int32_t, int32_t, uint32_t &);
 };
@@ -26,6 +25,6 @@ public:
 
 	static void initialize();
 	static void destroy();
-	static void generate(ShaderMap&, bool, container::Grid<float> &, Range, float, float, float, float);
+	static void generate(bool, container::Grid<float> &, Range, float, float, float, float);
 	static GLuint GetResultBuffer() {return resultBuffer_;}
 };

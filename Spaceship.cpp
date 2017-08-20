@@ -39,7 +39,7 @@ void Spaceship::updateLogic() {
 	}
 	if(controller_->isActing(Actions::THRUST)) {
 		if(rigidBody_ != nullptr)
-			rigidBody_->Drag(forward * 0.01f);
+			rigidBody_->Drag(forward * 0.001f);
 	}
 
 	if(controller_->isHuman()) {
