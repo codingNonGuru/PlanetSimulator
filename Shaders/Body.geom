@@ -8,22 +8,24 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 252) out;
 
 in float scale[];
+in float rotation[];
 
 void main() {
 	int triangleCount = 84;
 	float angle = 0.0f;
 	float angleIncrement = 6.2831f / float(triangleCount);
+	//float s = sin(rotation[0]);
+	//float c = cos(rotation[0]);
 	for(int i = 0; i < triangleCount; ++i)
 	{
 		float firstY = float(i) / float(triangleCount);
-		//firstY *= 0.1f;
 		float secondY = float(i + 1) / float(triangleCount);
-		//secondY *= 0.1f;
 		float firstScale = texture(alpha, vec2(0.2f, firstY)).r * scale[0];
 		float secondScale = texture(alpha, vec2(0.2f, secondY)).r * scale[0];
-		gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle) * firstScale, sin(angle) * firstScale, 0.0f, 0.0f)); 
+		
+		gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle + rotation[0]) * firstScale, sin(angle + rotation[0]) * firstScale, 0.0f, 0.0f)); 
 	    EmitVertex();
-	    gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle + angleIncrement) * secondScale, sin(angle + angleIncrement) * secondScale, 0.0f, 0.0f)); 
+	    gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle + angleIncrement + rotation[0]) * secondScale, sin(angle + angleIncrement + rotation[0]) * secondScale, 0.0f, 0.0f)); 
 	    EmitVertex();
 	    gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(0.0f, 0.0f, 0.0f, 0.0f)); 
 	    EmitVertex();

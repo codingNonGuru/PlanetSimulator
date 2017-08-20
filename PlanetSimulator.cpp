@@ -20,6 +20,7 @@
 #include "Shader.hpp"
 #include "Transform.hpp"
 #include "Renderer.hpp"
+#include "Utility.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
@@ -169,22 +170,20 @@ void initializeGraphics() {
 	mainScene.ownShip_ = ship;
 
 	Asteroid* asteroid;
-	asteroid = mainScene.asteroids_.allocate();
-	asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(60.0f, 10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, true);
-	asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
-	asteroid->GetRigidBody()->angularDrag_ = 1.0f;
-	//asteroid->GetRigidBody()->Drag(glm::vec3)
-	asteroid = mainScene.asteroids_.allocate();
-	asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(-40.0f, 40.0f, 0.0f), glm::vec3(0.0f, 0.0f, 2.8f), 0.0f, true, true);
-	asteroid->GetRigidBody()->angularMomentum_ = -0.01f;
-	asteroid->GetRigidBody()->angularDrag_ = 1.0f;
-	asteroid = mainScene.asteroids_.allocate();
-	asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(120.0f, 40.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, true, true);
+	for(int i = 0; i < 120; ++i)
+	{
+		asteroid = mainScene.asteroids_.allocate();
+		float angle = utility::getRandom(0.0f, 6.2831f);
+		float radius = utility::getRandom(65.0f, 80.0f);
+		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(cos(angle) * radius, sin(angle) * radius, 0.0f), glm::vec3(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 0.0f, true, true);
+		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
+		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
+	}
 
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
 	planet->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
-	planet->GetRigidBody()->angularMomentum_ = 0.01f;
+	planet->GetRigidBody()->angularMomentum_ = 0.001f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
 	GLuint key;
@@ -302,6 +301,9 @@ int main() {
 			if(projectile->isValid_ == true && projectile->isWorking_ == true) {
 				projectile->updatePhysics();
 			}
+		for(Planet* planet = mainScene.planets_.getStart(); planet != mainScene.planets_.getEnd(); ++planet)
+			if(planet->isValid_)
+				planet->updatePhysics();
 		for(auto asteroid = mainScene.asteroids_.getStart(); asteroid != mainScene.asteroids_.getEnd(); ++asteroid)
 			if(asteroid->isValid_) {
 				asteroid->updatePhysics();

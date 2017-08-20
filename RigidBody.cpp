@@ -30,7 +30,7 @@ void RigidBody::initialize(GameObject* parent, float impulse, bool hasDrag, bool
 	{
 		float distance = glm::length(parent->transform_->position_);
 		glm::vec3 direction = parent->transform_->position_ / distance;
-		velocity_ = 0.8f * glm::vec3(direction.y, -direction.x, 0.0f) * sqrt(2.0f / distance);
+		velocity_ = glm::vec3(direction.y, -direction.x, 0.0f) * sqrt(2.0f / distance);
 	}
 }
 

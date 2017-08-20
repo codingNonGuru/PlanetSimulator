@@ -17,7 +17,7 @@ container::Array<float> Renderer::rotationBuffer_ = container::Array<float>();
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.03f;
+float Renderer::zoomFactor_ = 0.1f;
 
 Texture texture;
 
@@ -37,7 +37,7 @@ void Renderer::Initialize()
 	GLuint key;
 	glGenVertexArrays(1, &key);
 	glBindVertexArray(key);
-	bodyBuffer_ = new Buffer(key, 3);
+	bodyBuffer_ = new Buffer(key, 4);
 
 	//Position buffer
 	glGenBuffers(1, &key);
@@ -84,11 +84,12 @@ void Renderer::Draw(Scene* scene)
 	rotationBuffer_.reset();
 
 	int count = 0;
-	for(auto asteroid = scene->asteroids_.getStart(); asteroid != scene->asteroids_.getEnd(); ++asteroid)
+	for(Asteroid* asteroid = scene->asteroids_.getStart(); asteroid != scene->asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)
 		{
 			*positionBuffer_.allocate() = asteroid->transform_->position_;
-			*scaleBuffer_.allocate() = 3.0f;
+			*scaleBuffer_.allocate() = 1.0f;
+			*rotationBuffer_.allocate() = asteroid->transform_->rotation_.z;
 			count++;
 		}
 	for(Planet* planet = scene->planets_.getStart(); planet != scene->planets_.getEnd(); ++planet)
@@ -96,6 +97,7 @@ void Renderer::Draw(Scene* scene)
 		{
 			*positionBuffer_.allocate() = planet->transform_->position_;
 			*scaleBuffer_.allocate() = 25.0f;
+			*rotationBuffer_.allocate() = planet->transform_->rotation_.z;
 			count++;
 		}
 
@@ -105,6 +107,8 @@ void Renderer::Draw(Scene* scene)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, positionBuffer_.getMemorySize(), positionBuffer_.getStart());
 	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(1));
 	glBufferSubData(GL_ARRAY_BUFFER, 0, scaleBuffer_.getMemorySize(), scaleBuffer_.getStart());
+	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(2));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, rotationBuffer_.getMemorySize(), rotationBuffer_.getStart());
 	shaderMap_->use(Shaders::BODY);
 	glUniformMatrix4fv(0, 1, GL_FALSE, &matrix_[0][0]);
 	texture.Bind(0, &shaderMap_->get(Shaders::BODY), "alpha");
