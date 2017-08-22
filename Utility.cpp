@@ -15,12 +15,13 @@ namespace utility
 		return Value(mt);
 	}
 
-	void randomize(float* vector, float minimum, float maximum) {
-		std::uniform_real_distribution<float> dist(0.0f, 6.2831f);
-		float angle = dist(mt);
-		float radius = dist(mt) * maximum + minimum;
-		*(vector + 0) = cos(angle) * radius;
-		*(vector + 1) = sin(angle) * radius;
-		*(vector + 2) = 0.0f;
+	float biasedRandom(float minValue, float maxValue, float expValue, float standDev) {
+		float value = getRandom(minValue, maxValue);
+		float gaussCh = 1.0f - exp(-pow(value - expValue, 2.0f) / (2.0f * pow(standDev, 2.0f)));
+		if(throwChance<float>(gaussCh) == true)
+			return biasedRandom(minValue, maxValue, expValue, standDev);
+			//return random_f(minValue, maxValue);
+		else
+			return value;
 	}
 }

@@ -93,7 +93,12 @@ namespace utility
 
 	float getRandom(float minimum, float maximum);
 
+	template<typename ValueType>
+	static bool throwChance (ValueType chance) {
+		return getRandom(0.0f, 1.0f) < chance;
+	}
+
 	int getRandom(int min, int max);
 
-	void randomize(float* vector, float minimum, float maximum);
+	float biasedRandom(float, float, float, float);
 }

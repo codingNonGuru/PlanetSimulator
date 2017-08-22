@@ -30,6 +30,7 @@ public:
 	Scene();
 	void initialize();
 	virtual ~Scene();
+	void UpdatePhysics();
 };
 
 #endif /* SCENE_HPP_ */

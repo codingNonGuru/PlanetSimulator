@@ -30,7 +30,7 @@ void RigidBody::initialize(GameObject* parent, float impulse, bool hasDrag, bool
 	{
 		float distance = glm::length(parent->transform_->position_);
 		glm::vec3 direction = parent->transform_->position_ / distance;
-		velocity_ = glm::vec3(direction.y, -direction.x, 0.0f) * sqrt(2.0f / distance);
+		velocity_ = glm::vec3(direction.y, -direction.x, 0.0f) * sqrt(0.5f / distance);
 	}
 }
 
@@ -57,7 +57,8 @@ void RigidBody::updateGravity(GameObject* parent) {
 		{
 			glm::vec3 direction = planet->transform_->position_ - parent->transform_->position_;
 			float distance = glm::length(direction);
-			velocity_ += (direction * mass_ * planet->GetRigidBody()->mass_) / (distance * distance * distance);
+			//velocity_ += (direction * mass_ * planet->GetRigidBody()->mass_) / (distance * distance * distance);
+			velocity_ += (direction * mass_ * 0.5f) / (distance * distance * distance);
 		}
 	}
 }

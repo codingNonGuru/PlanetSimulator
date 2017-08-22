@@ -10,22 +10,29 @@
 #include "Shader.hpp"
 #include "Fractal.hpp"
 #include "Texture.hpp"
+#include "Utility.hpp"
 
 container::Array<glm::vec3> Renderer::positionBuffer_ = container::Array<glm::vec3>();
 container::Array<float> Renderer::scaleBuffer_ = container::Array<float>();
 container::Array<float> Renderer::rotationBuffer_ = container::Array<float>();
+container::Array<float> Renderer::highlightBuffer_ = container::Array<float>();
+container::Array<int> Renderer::resolutionBuffer_ = container::Array<int>();
+container::Array<float> Renderer::offsetBuffer_ = container::Array<float>();
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.1f;
+float Renderer::zoomFactor_ = 0.05f;
 
 Texture texture;
 
-void Renderer::Initialize()
+void Renderer::Initialize(Scene* scene)
 {
-	positionBuffer_.initialize(128);
-	scaleBuffer_.initialize(128);
-	rotationBuffer_.initialize(128);
+	positionBuffer_.initialize(512);
+	scaleBuffer_.initialize(512);
+	rotationBuffer_.initialize(512);
+	highlightBuffer_.initialize(512);
+	resolutionBuffer_.initialize(512);
+	offsetBuffer_.initialize(512);
 
 	shaderMap_->initialize(Shaders::SPRITE, "Shaders/Sprite.vert", "Shaders/Sprite.frag", nullptr);
 	shaderMap_->initialize(Shaders::BODY, "Shaders/Body.vert", "Shaders/Body.frag", "Shaders/Body.geom");
@@ -37,13 +44,13 @@ void Renderer::Initialize()
 	GLuint key;
 	glGenVertexArrays(1, &key);
 	glBindVertexArray(key);
-	bodyBuffer_ = new Buffer(key, 4);
+	bodyBuffer_ = new Buffer(key, 6);
 
 	//Position buffer
 	glGenBuffers(1, &key);
 	bodyBuffer_->AddBuffer(key);
 	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 128, 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, positionBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
@@ -51,7 +58,7 @@ void Renderer::Initialize()
 	glGenBuffers(1, &key);
 	bodyBuffer_->AddBuffer(key);
 	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 128, 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, scaleBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 
@@ -59,15 +66,46 @@ void Renderer::Initialize()
 	glGenBuffers(1, &key);
 	bodyBuffer_->AddBuffer(key);
 	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 128, 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, rotationBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	//Highlight buffer
+	glGenBuffers(1, &key);
+	bodyBuffer_->AddBuffer(key);
+	glBindBuffer(GL_ARRAY_BUFFER, key);
+	glBufferData(GL_ARRAY_BUFFER, highlightBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	//Resolution buffer
+	glGenBuffers(1, &key);
+	bodyBuffer_->AddBuffer(key);
+	glBindBuffer(GL_ARRAY_BUFFER, key);
+	glBufferData(GL_ARRAY_BUFFER, resolutionBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(4);
+	glVertexAttribIPointer(4, 1, GL_INT, 0, NULL);
+
+	//Resolution buffer
+	glGenBuffers(1, &key);
+	bodyBuffer_->AddBuffer(key);
+	glBindBuffer(GL_ARRAY_BUFFER, key);
+	glBufferData(GL_ARRAY_BUFFER, offsetBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	for(Asteroid* asteroid = scene->asteroids_.getStart(); asteroid != scene->asteroids_.getEnd(); ++asteroid)
+		if(asteroid->isValid_)
+			*offsetBuffer_.allocate() = utility::getRandom(0.0f, 1.0f);
+	for(Planet* planet = scene->planets_.getStart(); planet != scene->planets_.getEnd(); ++planet)
+		if(planet->isValid_)
+			*offsetBuffer_.allocate() = utility::getRandom(0.0f, 1.0f);
+
 	container::Grid<float> result(1024, 1024);
-	Perlin::generate(true, result, Range(0.7f, 1.0f), 2.0f, 3.0f, 0.5f, 1.0f);
+	Perlin::generate(true, result, Range(0.5f, 1.5f), 2.0f, 2.0f, 0.5f, 4.0f);
 	texture.Upload(&result, GL_R32F, GL_RED, GL_FLOAT);
 }
 
@@ -82,14 +120,18 @@ void Renderer::Draw(Scene* scene)
 	positionBuffer_.reset();
 	scaleBuffer_.reset();
 	rotationBuffer_.reset();
+	highlightBuffer_.reset();
+	resolutionBuffer_.reset();
 
 	int count = 0;
 	for(Asteroid* asteroid = scene->asteroids_.getStart(); asteroid != scene->asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)
 		{
 			*positionBuffer_.allocate() = asteroid->transform_->position_;
-			*scaleBuffer_.allocate() = 1.0f;
+			*scaleBuffer_.allocate() = asteroid->GetTransform()->scale_;
 			*rotationBuffer_.allocate() = asteroid->transform_->rotation_.z;
+			*highlightBuffer_.allocate() = asteroid == scene->ownShip_->sensor_.GetObject() ? 1.0f : 0.0f;
+			*resolutionBuffer_.allocate() = 12 + int((asteroid->GetTransform()->scale_ - 1.0f) * 12.0f);
 			count++;
 		}
 	for(Planet* planet = scene->planets_.getStart(); planet != scene->planets_.getEnd(); ++planet)
@@ -98,6 +140,8 @@ void Renderer::Draw(Scene* scene)
 			*positionBuffer_.allocate() = planet->transform_->position_;
 			*scaleBuffer_.allocate() = 25.0f;
 			*rotationBuffer_.allocate() = planet->transform_->rotation_.z;
+			*highlightBuffer_.allocate() = 0.0f;
+			*resolutionBuffer_.allocate() = 64;
 			count++;
 		}
 
@@ -109,6 +153,12 @@ void Renderer::Draw(Scene* scene)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, scaleBuffer_.getMemorySize(), scaleBuffer_.getStart());
 	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(2));
 	glBufferSubData(GL_ARRAY_BUFFER, 0, rotationBuffer_.getMemorySize(), rotationBuffer_.getStart());
+	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(3));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, highlightBuffer_.getMemorySize(), highlightBuffer_.getStart());
+	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(4));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, resolutionBuffer_.getMemorySize(), resolutionBuffer_.getStart());
+	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(5));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, offsetBuffer_.getMemorySize(), offsetBuffer_.getStart());
 	shaderMap_->use(Shaders::BODY);
 	glUniformMatrix4fv(0, 1, GL_FALSE, &matrix_[0][0]);
 	texture.Bind(0, &shaderMap_->get(Shaders::BODY), "alpha");

@@ -20,7 +20,7 @@ void Scene::initialize() {
 
 	ships_.initialize(32);
 	planets_.initialize(32);
-	asteroids_.initialize(128);
+	asteroids_.initialize(256);
 	controllers_.initialize(128);
 	projectiles_.initialize(512);
 	weaponSystems_.initialize(512);
@@ -42,6 +42,26 @@ void Scene::initialize() {
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid) {
 		asteroid->isValid_ = false;
 	}
+}
+
+void Scene::UpdatePhysics()
+{
+	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
+		if(asteroid->isValid_)
+			asteroid->updateGravity();
+
+	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
+		if(ship->isValid_ && ship->isWorking_)
+			ship->updatePhysics();
+	for(Projectile* projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile)
+		if(projectile->isValid_ && projectile->isWorking_ == true)
+			projectile->updatePhysics();
+	for(Planet* planet = planets_.getStart(); planet != planets_.getEnd(); ++planet)
+		if(planet->isValid_)
+			planet->updatePhysics();
+	for(Asteroid* asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
+		if(asteroid->isValid_)
+			asteroid->updatePhysics();
 }
 
 Scene::~Scene() {

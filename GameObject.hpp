@@ -34,6 +34,7 @@ public:
 	GameObject();
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }
+	Transform*& GetTransform() { return transform_; }
 };
 
 #endif /* GAMEOBJECT_HPP_ */

@@ -170,14 +170,15 @@ void initializeGraphics() {
 	mainScene.ownShip_ = ship;
 
 	Asteroid* asteroid;
-	for(int i = 0; i < 120; ++i)
+	for(int i = 0; i < 128; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
-		float radius = utility::getRandom(65.0f, 80.0f);
+		float radius = utility::biasedRandom(120.0f, 160.0f, 140.0f, 10.0f);//utility::getRandom(80.0f, 120.0f);
 		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(cos(angle) * radius, sin(angle) * radius, 0.0f), glm::vec3(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 0.0f, true, true);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
+		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
 	}
 
 	Planet* planet;
@@ -231,7 +232,7 @@ void initializeGraphics() {
 	free(colors);
 	free(plantScaleBuffer);
 
-	Renderer::Initialize();
+	Renderer::Initialize(&mainScene);
 
 	/*glGenVertexArrays(1, &particleVAO);
 	glBindVertexArray(particleVAO);
@@ -285,29 +286,8 @@ int main() {
 				projectile->updateLogic();
 			}
 
-		for(auto asteroid = mainScene.asteroids_.getStart(); asteroid != mainScene.asteroids_.getEnd(); ++asteroid)
-			if(asteroid->isValid_) {
-				asteroid->updateGravity();
-			}
-
-		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
-		{
-			if(ship->isValid_ && ship->isWorking_)
-			{
-				ship->updatePhysics();
-			}
-		}
-		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-			if(projectile->isValid_ == true && projectile->isWorking_ == true) {
-				projectile->updatePhysics();
-			}
-		for(Planet* planet = mainScene.planets_.getStart(); planet != mainScene.planets_.getEnd(); ++planet)
-			if(planet->isValid_)
-				planet->updatePhysics();
-		for(auto asteroid = mainScene.asteroids_.getStart(); asteroid != mainScene.asteroids_.getEnd(); ++asteroid)
-			if(asteroid->isValid_) {
-				asteroid->updatePhysics();
-			}
+		for(int i = 0; i < 2; ++i)
+			mainScene.UpdatePhysics();
 
 		draw();
 

@@ -14,6 +14,7 @@ class Transform {
 public:
 	glm::vec3 position_;
 	glm::vec3 rotation_;
+	float scale_;
 
 	Transform(glm::vec3, glm::vec3);
 	virtual ~Transform();
