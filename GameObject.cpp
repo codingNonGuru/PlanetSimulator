@@ -24,11 +24,12 @@ void GameObject::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::
 	rigidBody_->initialize(this, impulse, hasDrag, isOrbiting);
 	if(!isOrbiting)
 	{
-		if(isPlayer == true) {
+		if(isPlayer)
 			controller_ = mainScene_->controllers_.allocate<HumanController>();
-		}
 		else
 			controller_ = mainScene_->controllers_.allocate<MachineController>();
+
+		controller_->Initialize(this);
 	}
 	mesh_ = mesh;
 }

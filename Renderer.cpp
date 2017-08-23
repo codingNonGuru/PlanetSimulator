@@ -21,7 +21,7 @@ container::Array<float> Renderer::offsetBuffer_ = container::Array<float>();
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.05f;
+float Renderer::zoomFactor_ = 0.2f;
 
 Texture texture;
 
@@ -105,7 +105,7 @@ void Renderer::Initialize(Scene* scene)
 			*offsetBuffer_.allocate() = utility::getRandom(0.0f, 1.0f);
 
 	container::Grid<float> result(1024, 1024);
-	Perlin::generate(true, result, Range(0.5f, 1.5f), 2.0f, 2.0f, 0.5f, 4.0f);
+	Perlin::generate(true, result, Range(0.7f, 1.3f), 2.0f, 2.0f, 0.5f, 4.0f);
 	texture.Upload(&result, GL_R32F, GL_RED, GL_FLOAT);
 }
 
@@ -131,7 +131,7 @@ void Renderer::Draw(Scene* scene)
 			*scaleBuffer_.allocate() = asteroid->GetTransform()->scale_;
 			*rotationBuffer_.allocate() = asteroid->transform_->rotation_.z;
 			*highlightBuffer_.allocate() = asteroid == scene->ownShip_->sensor_.GetObject() ? 1.0f : 0.0f;
-			*resolutionBuffer_.allocate() = 12 + int((asteroid->GetTransform()->scale_ - 1.0f) * 12.0f);
+			*resolutionBuffer_.allocate() = 16 + int((asteroid->GetTransform()->scale_ - 1.0f) * 16.0f);
 			count++;
 		}
 	for(Planet* planet = scene->planets_.getStart(); planet != scene->planets_.getEnd(); ++planet)

@@ -16,6 +16,7 @@ public:
 	glm::vec3 rotation_;
 	float scale_;
 
+	glm::vec3 GetForward();
 	Transform(glm::vec3, glm::vec3);
 	virtual ~Transform();
 };

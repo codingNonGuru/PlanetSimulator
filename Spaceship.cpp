@@ -27,7 +27,7 @@ void Spaceship::updateLogic() {
 	if(controller_->isActing(Actions::SHOOT) == true && weapon_->canFire() == true) {
 		weapon_->lastFire_ = 0.0f;
 		auto projectile = mainScene_->projectiles_.allocate();
-		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + forward * 5.0f, transform_->rotation_, 2.0f, false, false);
+		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + forward * 1.0f, transform_->rotation_, 0.5f, false, false);
 	}
 	if(controller_->isActing(Actions::STEER_LEFT)) {
 		if(rigidBody_ != nullptr)
@@ -40,6 +40,10 @@ void Spaceship::updateLogic() {
 	if(controller_->isActing(Actions::THRUST)) {
 		if(rigidBody_ != nullptr)
 			rigidBody_->Drag(forward * 0.001f);
+	}
+	if(controller_->isActing(Actions::RETURN)) {
+		if(rigidBody_ != nullptr)
+			rigidBody_->Drag(-forward * 0.001f);
 	}
 
 	if(controller_->isHuman()) {

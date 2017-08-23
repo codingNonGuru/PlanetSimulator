@@ -23,7 +23,7 @@ void RigidBody::initialize(GameObject* parent, float impulse, bool hasDrag, bool
 	velocity_ = glm::vec3(cos(angle), sin(angle), 0.0f) * impulse;
 	angularMomentum_ = 0.0f;
 	drag_ = isOrbiting == false ? 0.995f : 1.0f;
-	angularDrag_ = 0.98f;
+	angularDrag_ = 0.9f;
 	mass_ = 1.0f;
 
 	if(isOrbiting)

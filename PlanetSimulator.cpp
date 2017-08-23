@@ -67,7 +67,7 @@ void draw() {
 	framebuffers[Framebuffers::DEFAULT].bindBuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
 	//framebuffers[Framebuffers::DEFAULT].bindBuffer(GL_READ_BUFFER, GL_BACK);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.1f, 0.5f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 	glClearDepth(1.0f);
 
 	Renderer::Draw(&mainScene);
@@ -86,17 +86,21 @@ void draw() {
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[0].textureKey_);
 	glUniform2f(2, Engine::sprites_[0].scale_.x, Engine::sprites_[0].scale_.y);
 	glUniform1i(3, 0);
-	ownShip->draw(finalMatrix);
+	for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
+		if(ship->isValid_) {
+			ship->draw(finalMatrix);
+		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
-	Renderer::GetMap()->use(Shaders::SPACESHIP);
-	bindTexture(Shaders::SPACESHIP, "alpha", 0, Engine::sprites_[1].textureKey_);
+	Renderer::GetMap()->use(Shaders::SPRITE);
+	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
 	glUniform2f(2, Engine::sprites_[1].scale_.x, Engine::sprites_[1].scale_.y);
-	for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-		if(projectile->isValid_ == true) {
+	glUniform1i(3, 0);
+	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
+		if(projectile->isValid_) {
 			projectile->draw(finalMatrix);
 		}
-	Renderer::GetMap()->unuse(Shaders::SPACESHIP);
+	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
 	/*materialAtlas.use(Shaders::PARTICLES_INSTANCED);
 	glBindVertexArray(particleVAO);
@@ -166,15 +170,17 @@ void initializeGraphics() {
 
 	Spaceship* ship;
 	ship = mainScene.ships_.allocate();
-	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(35.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
 	mainScene.ownShip_ = ship;
+	ship = mainScene.ships_.allocate();
+	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(60.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
 
 	Asteroid* asteroid;
 	for(int i = 0; i < 128; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
-		float radius = utility::biasedRandom(120.0f, 160.0f, 140.0f, 10.0f);//utility::getRandom(80.0f, 120.0f);
+		float radius = utility::biasedRandom(160.0f, 240.0f, 200.0f, 20.0f);//utility::getRandom(80.0f, 120.0f);
 		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(cos(angle) * radius, sin(angle) * radius, 0.0f), glm::vec3(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 0.0f, true, true);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
@@ -282,7 +288,7 @@ int main() {
 			}
 		}
 		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-			if(projectile->isValid_ == true && projectile->isWorking_ == true) {
+			if(projectile->isValid_ && projectile->isWorking_) {
 				projectile->updateLogic();
 			}
 
