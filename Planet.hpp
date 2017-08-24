@@ -4,5 +4,4 @@
 
 class Planet : public GameObject {
 public:
-
 };

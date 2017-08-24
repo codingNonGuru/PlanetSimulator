@@ -35,6 +35,7 @@ public:
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }
 	Transform*& GetTransform() { return transform_; }
+	virtual bool IsControlled() {return false;}
 };
 
 #endif /* GAMEOBJECT_HPP_ */

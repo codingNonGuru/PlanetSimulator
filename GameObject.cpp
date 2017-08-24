@@ -22,7 +22,7 @@ void GameObject::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::
 	transform_ = new Transform(position, rotation);
 	rigidBody_ = new RigidBody();
 	rigidBody_->initialize(this, impulse, hasDrag, isOrbiting);
-	if(!isOrbiting)
+	if(IsControlled())
 	{
 		if(isPlayer)
 			controller_ = mainScene_->controllers_.allocate<HumanController>();

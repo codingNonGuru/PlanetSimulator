@@ -40,7 +40,7 @@ void MachineController::update() {
 	}
 
 	glm::vec3 direction = otherShip->GetTransform()->position_ - parent_->GetTransform()->position_;
-	float distance = glm::length(direction);
+	distance = glm::length(direction);
 	direction /= distance;
 	glm::vec3 forward = parent_->GetTransform()->GetForward();
 
@@ -51,6 +51,7 @@ void MachineController::update() {
 	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
 	SetAction(Actions::THRUST, distance > 3.0f && dotProduct > 0.7f);
 	SetAction(Actions::RETURN, distance > 3.0f && dotProduct < -0.7f);
+	SetAction(Actions::SHOOT, distance > 10.0f && distance < 20.0f && dotProduct > 0.95f);
 }
 
 Controller::~Controller() {

@@ -17,7 +17,7 @@ public:
 	float lastFire_;
 	float fireSpeed_;
 
-	void initialize();
+	void initialize(float);
 	void update();
 	bool canFire();
 };
@@ -58,6 +58,7 @@ public:
 	void initialize(bool, Mesh*, glm::vec3, glm::vec3, float, bool, bool) override;
 	Spaceship();
 	virtual ~Spaceship();
+	bool IsControlled() override {return true;}
 };
 
 class Projectile : public GameObject {

@@ -3,5 +3,5 @@
 #include "GameObject.hpp"
 
 class Asteroid : public GameObject {
-
+public:
 };

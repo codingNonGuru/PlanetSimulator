@@ -16,6 +16,7 @@
 #include "Mesh.hpp"
 #include "RigidBody.hpp"
 #include "Transform.hpp"
+#include "Utility.hpp"
 
 Spaceship::Spaceship() {}
 
@@ -23,11 +24,14 @@ void Spaceship::updateLogic() {
 	controller_->update();
 	weapon_->update();
 
-	glm::vec3 forward(cos(transform_->rotation_.z), sin(transform_->rotation_.z), 0.0f);
+	glm::vec3 forward = transform_->GetForward();
 	if(controller_->isActing(Actions::SHOOT) == true && weapon_->canFire() == true) {
 		weapon_->lastFire_ = 0.0f;
+		float shootAngle = transform_->rotation_.z + utility::getRandom(-0.15f, 0.15f);
+		glm::vec3 shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
+		float speed = utility::getRandom(0.47f, 0.53f);
 		auto projectile = mainScene_->projectiles_.allocate();
-		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + forward * 1.0f, transform_->rotation_, 0.5f, false, false);
+		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + shootDirection * 1.0f, glm::vec3(0.0f, 0.0f, shootAngle), speed, false, false);
 	}
 	if(controller_->isActing(Actions::STEER_LEFT)) {
 		if(rigidBody_ != nullptr)
@@ -83,7 +87,7 @@ Spaceship::~Spaceship() {
 void Spaceship::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::vec3 rotation, float impulse, bool hasDrag, bool isOrbiting) {
 	GameObject::initialize(isPlayer, mesh, position, rotation, impulse, hasDrag, false);
 	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize();
+	weapon_->initialize(0.012f);
 	sensor_ = Sensor();
 	cargo_ = Cargo();
 }
@@ -99,9 +103,9 @@ void Projectile::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::
 	lifeTime_ = 0.0f;
 }
 
-void Weapon::initialize() {
+void Weapon::initialize(float fireSpeed) {
 	lastFire_ = 0.0f;
-	fireSpeed_ = 0.1f;
+	fireSpeed_ = fireSpeed;
 }
 
 void Weapon::update() {

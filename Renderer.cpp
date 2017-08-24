@@ -21,7 +21,7 @@ container::Array<float> Renderer::offsetBuffer_ = container::Array<float>();
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.2f;
+float Renderer::zoomFactor_ = 0.1f;
 
 Texture texture;
 
