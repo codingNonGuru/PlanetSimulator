@@ -22,7 +22,7 @@ void Scene::initialize() {
 	planets_.initialize(32);
 	asteroids_.initialize(256);
 	controllers_.initialize(128);
-	projectiles_.initialize(512);
+	projectiles_.initialize(1024);
 	weaponSystems_.initialize(512);
 
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship) {

@@ -6,7 +6,7 @@
 #include "Scene.hpp"
 #include "Transform.hpp"
 
-bool Controller::isActing(Actions action) {
+bool Controller::IsActing(Actions action) {
 	return actions_[(int)action];
 }
 
@@ -49,9 +49,10 @@ void MachineController::update() {
 
 	SetAction(Actions::STEER_LEFT, crossProduct.z > 0.0f);
 	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
-	SetAction(Actions::THRUST, distance > 3.0f && dotProduct > 0.7f);
-	SetAction(Actions::RETURN, distance > 3.0f && dotProduct < -0.7f);
+	SetAction(Actions::THRUST, (distance > 14.0f && dotProduct > 0.7f) || (distance < 8.0f && dotProduct < -0.7f));
+	SetAction(Actions::RETURN, (distance > 14.0f && dotProduct < -0.7f) || (distance < 8.0f && dotProduct > 0.7f));
 	SetAction(Actions::SHOOT, distance > 10.0f && distance < 20.0f && dotProduct > 0.95f);
+	SetAction(Actions::COOL, parent_->GetWeapon()->GetHeatFactor() > 0.95f);
 }
 
 Controller::~Controller() {

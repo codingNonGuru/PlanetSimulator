@@ -15,6 +15,7 @@ class Transform;
 class RigidBody;
 class Controller;
 class Scene;
+class Weapon;
 
 class GameObject {
 public:
@@ -35,6 +36,7 @@ public:
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }
 	Transform*& GetTransform() { return transform_; }
+	virtual Weapon* GetWeapon() {return nullptr;}
 	virtual bool IsControlled() {return false;}
 };
 

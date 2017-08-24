@@ -84,10 +84,11 @@ void draw() {
 
 	Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[0].textureKey_);
-	glUniform2f(2, Engine::sprites_[0].scale_.x, Engine::sprites_[0].scale_.y);
+	glUniform2f(2, Engine::sprites_[0].scale_.x * 0.5f, Engine::sprites_[0].scale_.y * 0.5f);
 	glUniform1i(3, 0);
 	for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
 		if(ship->isValid_) {
+			glUniform1f(4, 1.0f);
 			ship->draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
@@ -98,6 +99,8 @@ void draw() {
 	glUniform1i(3, 0);
 	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 		if(projectile->isValid_) {
+			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 3.0f;
+			glUniform1f(4, 3.0f * speed * speed - 2.0f * speed * speed * speed);
 			projectile->draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
@@ -170,17 +173,17 @@ void initializeGraphics() {
 
 	Spaceship* ship;
 	ship = mainScene.ships_.allocate();
-	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(35.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(45.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
 	mainScene.ownShip_ = ship;
 	ship = mainScene.ships_.allocate();
-	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(60.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(70.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
 
 	Asteroid* asteroid;
-	for(int i = 0; i < 128; ++i)
+	for(int i = 0; i < 80; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
-		float radius = utility::biasedRandom(160.0f, 240.0f, 200.0f, 20.0f);//utility::getRandom(80.0f, 120.0f);
+		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);//utility::getRandom(80.0f, 120.0f);
 		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(cos(angle) * radius, sin(angle) * radius, 0.0f), glm::vec3(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 0.0f, true, true);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
@@ -203,40 +206,6 @@ void initializeGraphics() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
-
-	GLuint colorBuffer;
-	unsigned int plantCount = 1024;
-	unsigned int objectCount = plantCount + 1;
-	glm::vec4* positionBuffer = (glm::vec4*)malloc(sizeof(glm::vec4) * objectCount);
-	int x = 0, y = 0;
-	for(glm::vec4* particle = positionBuffer; particle != positionBuffer + plantCount; ++particle) {
-		*particle = glm::vec4(0.0f);
-	}
-	glGenBuffers(1, &posSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec4) * objectCount, positionBuffer, GL_STATIC_DRAW);
-
-	float* plantScaleBuffer = (float*)malloc(sizeof(float) * objectCount);
-	for(float* scale = plantScaleBuffer; scale != plantScaleBuffer + plantCount; ++scale)
-		*scale = 30.0f;
-	*(plantScaleBuffer + plantCount) = 1000.0f;
-	glGenBuffers(1, &velSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(float) * objectCount, plantScaleBuffer, GL_STATIC_DRAW);
-
-	glm::vec3* colors = (glm::vec3*)malloc(sizeof(glm::vec3) * objectCount);
-	for(glm::vec3* color = colors; color != colors + objectCount; ++color) {
-		*color = glm::vec3(1.0f);
-	}
-	*(colors + plantCount) = glm::vec3(0.0f, 1.0f, 0.0f);
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * objectCount, colors, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-	free(positionBuffer);
-	free(colors);
-	free(plantScaleBuffer);
 
 	Renderer::Initialize(&mainScene);
 
@@ -278,6 +247,7 @@ int main() {
 	EventHandler::Initialize();
 
 	while(Engine::IsRunning()){
+		std::cout<<mainScene.projectiles_.getSize()<<"\n";
 		EventHandler::update();
 
 		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)

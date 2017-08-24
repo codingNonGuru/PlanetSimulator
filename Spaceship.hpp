@@ -12,14 +12,24 @@
 
 #include "GameObject.hpp"
 
+typedef float Temperature;
+typedef float Power;
+
 class Weapon {
 public:
 	float lastFire_;
 	float fireSpeed_;
+	Temperature temperature_;
+	float coolingRate_;
+	Temperature overheatPoint_;
+	bool isCooling_;
 
-	void initialize(float);
+	void initialize(float, Temperature, float);
 	void update();
-	bool canFire();
+	bool CanFire();
+	void Fire();
+	float GetHeatFactor();
+	void Cool();
 };
 
 class Sensor {
@@ -34,6 +44,12 @@ public:
 	GameObject* GetObject() {return closestObject_;}
 	float GetLimit() {return distanceLimit_;}
 	void SetLimit(float distanceLimit) {distanceLimit_ = distanceLimit;}
+};
+
+class Thruster {
+public:
+	float fuel_;
+
 };
 
 class Hull {
@@ -59,6 +75,7 @@ public:
 	Spaceship();
 	virtual ~Spaceship();
 	bool IsControlled() override {return true;}
+	Weapon* GetWeapon() override {return weapon_;}
 };
 
 class Projectile : public GameObject {
