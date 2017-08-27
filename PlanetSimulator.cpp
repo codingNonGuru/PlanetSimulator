@@ -21,6 +21,7 @@
 #include "Transform.hpp"
 #include "Renderer.hpp"
 #include "Utility.hpp"
+#include "Texture.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
@@ -76,13 +77,14 @@ void draw() {
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[2].textureKey_);
 	glUniform2f(2, Engine::sprites_[2].scale_.x, Engine::sprites_[2].scale_.y);
 	for(Planet* planet = mainScene.planets_.getStart(); planet != mainScene.planets_.getEnd(); ++planet)
-		if(planet->isValid_ == true) {
+		if(planet->isValid_) {
 			glUniform1i(3, 0);
 			planet->draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
 	Renderer::GetMap()->use(Shaders::SPRITE);
+	//Renderer::perlinTexture_->Bind(0, &Renderer::GetMap()->get(Shaders::SPRITE), "alpha");
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[0].textureKey_);
 	glUniform2f(2, Engine::sprites_[0].scale_.x * 0.5f, Engine::sprites_[0].scale_.y * 0.5f);
 	glUniform1i(3, 0);
@@ -99,7 +101,9 @@ void draw() {
 	glUniform1i(3, 0);
 	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 		if(projectile->isValid_) {
-			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 3.0f;
+			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 2.0f;
+			if(speed > 1.0f)
+				speed = 1.0f;
 			glUniform1f(4, 3.0f * speed * speed - 2.0f * speed * speed * speed);
 			projectile->draw(finalMatrix);
 		}
@@ -247,7 +251,6 @@ int main() {
 	EventHandler::Initialize();
 
 	while(Engine::IsRunning()){
-		std::cout<<mainScene.projectiles_.getSize()<<"\n";
 		EventHandler::update();
 
 		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)

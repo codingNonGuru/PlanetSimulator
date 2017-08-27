@@ -2,6 +2,8 @@
 
 layout (location = 0) out vec4 finalColor;
 
+uniform sampler2D alpha;
+
 in float fragHighlight;
 
 void main() {

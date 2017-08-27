@@ -151,7 +151,7 @@ void addOctaves() {
 	uint index = y * size.x + x;
 
 	result[index] = result[index] / float(octaveCount) + 0.5f;
-	result[index] = pow(result[index], pow(contrastStrength, 4.0f * contrast - 4.0f * result[index]));
+	result[index] = pow(result[index], pow(contrastStrength, 16.0f * contrast - 16.0f * result[index]));
 	result[index] = result[index] * (range.y - range.x) + range.x;
 	/*if(result[index] > 0.5f)
 		result[index] = 1.0f;

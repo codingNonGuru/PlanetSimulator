@@ -11,9 +11,11 @@ in float scale[];
 in float rotation[];
 in float highlight[];
 in int resolution[];
-in float offset[];
+in float contrast[];
+in vec2 offset[];
 
 out float fragHighlight;
+out vec2 texCoords;
 
 void main() {
 	int triangleCount = resolution[0];
@@ -21,17 +23,40 @@ void main() {
 	float angleIncrement = 6.2831f / float(triangleCount);
 	for(int i = 0; i < triangleCount; ++i)
 	{
-		float firstY = float(i) / float(triangleCount);
-		float secondY = float(i + 1) / float(triangleCount);
-		float firstScale = texture(alpha, vec2(offset[0], firstY)).r * scale[0];
-		float secondScale = texture(alpha, vec2(offset[0], secondY)).r * scale[0];
+		{
+			float x = offset[0].x + cos(angle) * 0.1f;
+			float y = offset[0].y + sin(angle) * 0.1f;
+			float radius = texture(alpha, vec2(x, y)).r;
+			radius -= 0.5f;
+			radius *= contrast[0];
+			radius += 1.0f;
+			radius *= scale[0];
+			
+			x = cos(angle + rotation[0]) * radius;
+			y = sin(angle + rotation[0]) * radius;
+			
+			gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(x, y, 0.0f, 0.0f));
+			fragHighlight = highlight[0]; 
+		    EmitVertex();	
+		}
 		
-		gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle + rotation[0]) * firstScale, sin(angle + rotation[0]) * firstScale, 0.0f, 0.0f));
-		fragHighlight = highlight[0]; 
-	    EmitVertex();
-	    gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(cos(angle + angleIncrement + rotation[0]) * secondScale, sin(angle + angleIncrement + rotation[0]) * secondScale, 0.0f, 0.0f));
-	    fragHighlight = highlight[0]; 
-	    EmitVertex();
+		{
+			float x = offset[0].x + cos(angle + angleIncrement) * 0.1f;
+			float y = offset[0].y + sin(angle + angleIncrement) * 0.1f;
+			float radius = texture(alpha, vec2(x, y)).r;
+			radius -= 0.5f;
+			radius *= contrast[0];
+			radius += 1.0f;
+			radius *= scale[0];
+			
+			x = cos(angle + angleIncrement + rotation[0]) * radius;
+			y = sin(angle + angleIncrement + rotation[0]) * radius;
+			
+			gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(x, y, 0.0f, 0.0f));
+			fragHighlight = highlight[0]; 
+		    EmitVertex();	
+		}
+		
 	    gl_Position = projMatrix * (gl_in[0].gl_Position + vec4(0.0f, 0.0f, 0.0f, 0.0f));
 	    fragHighlight = highlight[0]; 
 	    EmitVertex();

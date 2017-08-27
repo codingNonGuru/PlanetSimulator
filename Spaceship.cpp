@@ -29,7 +29,7 @@ void Spaceship::updateLogic() {
 		weapon_->Fire();
 		float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.2f, 0.2f, 0.0f, 0.1f); // + utility::getRandom(-0.15f, 0.15f);
 		glm::vec3 shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-		float speed = utility::getRandom(0.27f, 0.33f);
+		float speed = utility::getRandom(0.43f, 0.47f);
 		auto projectile = mainScene_->projectiles_.allocate();
 		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + shootDirection * utility::getRandom(0.4f, 1.0f), glm::vec3(0.0f, 0.0f, shootAngle), speed, false, false);
 	}
