@@ -9,6 +9,7 @@
 #include "Controller.hpp"
 #include "Planet.hpp"
 #include "Spaceship.hpp"
+#include "Collider.hpp"
 
 Scene::Scene() {
 	// TODO Auto-generated constructor stub
@@ -24,6 +25,8 @@ void Scene::initialize() {
 	controllers_.initialize(128);
 	projectiles_.initialize(1024);
 	weaponSystems_.initialize(512);
+	colliders_.initialize(2048);
+	collisions_.initialize(1024);
 
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship) {
 		ship->isValid_ = false;
@@ -44,6 +47,16 @@ void Scene::initialize() {
 	}
 }
 
+void Scene::UpdateCollisions()
+{
+	for(Projectile* projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile)
+		if(projectile->isValid_ && projectile->isWorking_)
+			projectile->UpdateCollisions();
+	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
+		if(ship->isValid_ && ship->isWorking_)
+			ship->UpdateCollisions();
+}
+
 void Scene::UpdatePhysics()
 {
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
@@ -54,7 +67,7 @@ void Scene::UpdatePhysics()
 		if(ship->isValid_ && ship->isWorking_)
 			ship->updatePhysics();
 	for(Projectile* projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile)
-		if(projectile->isValid_ && projectile->isWorking_ == true)
+		if(projectile->isValid_ && projectile->isWorking_)
 			projectile->updatePhysics();
 	for(Planet* planet = planets_.getStart(); planet != planets_.getEnd(); ++planet)
 		if(planet->isValid_)

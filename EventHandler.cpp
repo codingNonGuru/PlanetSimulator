@@ -53,6 +53,8 @@ void EventHandler::receiveInput() {
 
 	if(keyStates[SDL_SCANCODE_UP])
 		*currentKeys_.allocate() = SDLK_UP;
+	if(keyStates[SDL_SCANCODE_DOWN])
+		*currentKeys_.allocate() = SDLK_DOWN;
 	if(keyStates[SDL_SCANCODE_LEFT])
 		*currentKeys_.allocate() = SDLK_LEFT;
 	if(keyStates[SDL_SCANCODE_RIGHT])

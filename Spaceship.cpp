@@ -17,6 +17,7 @@
 #include "RigidBody.hpp"
 #include "Transform.hpp"
 #include "Utility.hpp"
+#include "Collider.hpp"
 
 Spaceship::Spaceship() {}
 
@@ -24,14 +25,18 @@ void Spaceship::updateLogic() {
 	controller_->update();
 	weapon_->update();
 
-	glm::vec3 forward = transform_->GetForward();
+	Direction forward = transform_->GetForward();
 	if(controller_->IsActing(Actions::SHOOT) && weapon_->CanFire()) {
 		weapon_->Fire();
 		float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.2f, 0.2f, 0.0f, 0.1f); // + utility::getRandom(-0.15f, 0.15f);
-		glm::vec3 shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
+		Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
 		float speed = utility::getRandom(0.43f, 0.47f);
 		auto projectile = mainScene_->projectiles_.allocate();
-		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform_->position_ + shootDirection * utility::getRandom(0.4f, 1.0f), glm::vec3(0.0f, 0.0f, shootAngle), speed, false, false);
+		Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
+		Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
+		Transform* transform = new Transform(position, rotation, 1.0f);
+		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, speed, false, false);
+		projectile->SetParent(this);
 	}
 	if(controller_->IsActing(Actions::STEER_LEFT)) {
 		if(rigidBody_ != nullptr)
@@ -43,11 +48,11 @@ void Spaceship::updateLogic() {
 	}
 	if(controller_->IsActing(Actions::THRUST)) {
 		if(rigidBody_ != nullptr)
-			rigidBody_->Drag(forward * 0.001f);
+			rigidBody_->Drag(forward * 0.0015f);
 	}
 	if(controller_->IsActing(Actions::RETURN)) {
 		if(rigidBody_ != nullptr)
-			rigidBody_->Drag(-forward * 0.001f);
+			rigidBody_->Drag(-forward * 0.0015f);
 	}
 	if(controller_->IsActing(Actions::COOL)) {
 		weapon_->Cool();
@@ -87,22 +92,29 @@ Spaceship::~Spaceship() {
 	// TODO Auto-generated destructor stub
 }
 
-void Spaceship::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::vec3 rotation, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::initialize(isPlayer, mesh, position, rotation, impulse, hasDrag, false);
+void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
+
 	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize(0.002f, 20.0f, 0.97f);
+	weapon_->initialize(0.05f, 20.0f, 0.97f);
+
+	collider_ = mainScene_->colliders_.allocate();
+	collider_->Initialize(this, BoundingBoxes::CIRCLE);
+
 	sensor_ = Sensor();
 	cargo_ = Cargo();
 }
 
 void Projectile::updateLogic() {
 	lifeTime_ += 0.01f;
-	if(lifeTime_ > 1.5f)
+	if(lifeTime_ > 2.0f || collider_->collision_ != nullptr && collider_->collision_->collider_ != parent_)
 		isWorking_ = false;
 }
 
-void Projectile::initialize(bool isPlayer, Mesh* mesh, glm::vec3 position, glm::vec3 rotation, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::initialize(isPlayer, mesh, position, rotation, impulse, hasDrag, false);
+void Projectile::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
+	collider_ = mainScene_->colliders_.allocate();
+	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;
 }
 

@@ -9,14 +9,15 @@
 
 #include "Transform.hpp"
 
-Transform::Transform(glm::vec3 position, glm::vec3 rotation) {
+Transform::Transform(Position position, Rotation rotation, Scale scale) {
 	position_ = position;
 	rotation_ = rotation;
+	scale_ = scale;
 }
 
-glm::vec3 Transform::GetForward()
+Direction Transform::GetForward()
 {
-	return glm::vec3(cos(rotation_.z), sin(rotation_.z), 0.0f);
+	return Direction(cos(rotation_.z), sin(rotation_.z), 0.0f);
 }
 
 Transform::~Transform() {

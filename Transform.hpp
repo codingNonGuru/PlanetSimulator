@@ -10,14 +10,19 @@
 
 #include <glm.hpp>
 
+typedef glm::vec3 Position;
+typedef glm::vec3 Rotation;
+typedef glm::vec3 Direction;
+typedef float Scale;
+
 class Transform {
 public:
-	glm::vec3 position_;
-	glm::vec3 rotation_;
-	float scale_;
+	Position position_;
+	Rotation rotation_;
+	Scale scale_;
 
-	glm::vec3 GetForward();
-	Transform(glm::vec3, glm::vec3);
+	Direction GetForward();
+	Transform(Position, Rotation, Scale);
 	virtual ~Transform();
 };
 

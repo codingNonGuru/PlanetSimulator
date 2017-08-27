@@ -71,7 +71,7 @@ public:
 	Cargo cargo_;
 
 	void updateLogic() override;
-	void initialize(bool, Mesh*, glm::vec3, glm::vec3, float, bool, bool) override;
+	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
 	Spaceship();
 	virtual ~Spaceship();
 	bool IsControlled() override {return true;}
@@ -82,7 +82,7 @@ class Projectile : public GameObject {
 public:
 	float lifeTime_;
 
-	void initialize(bool, Mesh*, glm::vec3, glm::vec3, float, bool, bool) override;
+	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
 	void updateLogic() override;
 };
 

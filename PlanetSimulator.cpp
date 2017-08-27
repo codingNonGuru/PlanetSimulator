@@ -100,7 +100,7 @@ void draw() {
 	glUniform2f(2, Engine::sprites_[1].scale_.x, Engine::sprites_[1].scale_.y);
 	glUniform1i(3, 0);
 	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-		if(projectile->isValid_) {
+		if(projectile->isValid_ && projectile->isWorking_) {
 			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 2.0f;
 			if(speed > 1.0f)
 				speed = 1.0f;
@@ -175,20 +175,24 @@ void initializeGraphics() {
 	Engine::meshes_.initialize(Meshes::SPACESHIP);
 	Engine::meshes_.initialize(Meshes::PROJECTILE);
 
-	Spaceship* ship;
+	Transform* transform = nullptr;
+	Spaceship* ship = nullptr;
 	ship = mainScene.ships_.allocate();
-	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(45.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
+	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
 	mainScene.ownShip_ = ship;
 	ship = mainScene.ships_.allocate();
-	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(70.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	transform = new Transform(Position(70.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
+	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
 
 	Asteroid* asteroid;
 	for(int i = 0; i < 80; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
-		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);//utility::getRandom(80.0f, 120.0f);
-		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(cos(angle) * radius, sin(angle) * radius, 0.0f), glm::vec3(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 0.0f, true, true);
+		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
+		transform = new Transform(Position(cos(angle) * radius, sin(angle) * radius, 0.0f), Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
+		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, true);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
 		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
@@ -196,7 +200,8 @@ void initializeGraphics() {
 
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
-	planet->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, true, false);
+	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
+	planet->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
 	planet->GetRigidBody()->angularMomentum_ = 0.001f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
@@ -253,6 +258,7 @@ int main() {
 	while(Engine::IsRunning()){
 		EventHandler::update();
 
+		mainScene.UpdateCollisions();
 		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
 		{
 			if(ship->isValid_ && ship->isWorking_)
@@ -265,14 +271,14 @@ int main() {
 				projectile->updateLogic();
 			}
 
-		for(int i = 0; i < 2; ++i)
+		for(int i = 0; i < 1; ++i)
 			mainScene.UpdatePhysics();
 
 		draw();
 
 		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-			if(projectile->isValid_ == true && projectile->isWorking_ == false) {
-				projectile->isValid_ = false;
+			if(projectile->isValid_ && !projectile->isWorking_) {
+				projectile->Destroy();
 				mainScene.projectiles_.deallocate(projectile);
 			}
 		SDL_GL_SwapWindow(Engine::window_);

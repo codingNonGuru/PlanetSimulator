@@ -16,28 +16,35 @@ class RigidBody;
 class Controller;
 class Scene;
 class Weapon;
+class Collider;
 
 class GameObject {
 public:
 	static Scene* mainScene_;
 
-	bool isValid_, isWorking_;
+	GameObject* parent_;
 	Mesh* mesh_;
 	Transform* transform_;
 	RigidBody* rigidBody_;
 	Controller* controller_;
+	Collider* collider_;
+	bool isValid_, isWorking_;
 
-	virtual void initialize(bool, Mesh*, glm::vec3, glm::vec3, float, bool, bool);
+	virtual void initialize(bool, Mesh*, Transform*, float, bool, bool);
 	virtual void draw(glm::mat4&);
 	virtual void updatePhysics();
+	virtual void UpdateCollisions();
 	virtual void updateGravity();
 	virtual void updateLogic() {}
 	GameObject();
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }
 	Transform*& GetTransform() { return transform_; }
+	Collider* GetCollider() {return collider_;}
 	virtual Weapon* GetWeapon() {return nullptr;}
 	virtual bool IsControlled() {return false;}
+	void SetParent(GameObject* parent) {parent_ = parent;}
+	void Destroy();
 };
 
 #endif /* GAMEOBJECT_HPP_ */

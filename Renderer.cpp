@@ -22,7 +22,7 @@ container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.1f;
+float Renderer::zoomFactor_ = 0.05f;
 Texture* Renderer::perlinTexture_ = nullptr;
 
 void Renderer::Initialize(Scene* scene)

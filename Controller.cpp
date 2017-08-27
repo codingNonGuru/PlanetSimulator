@@ -51,7 +51,7 @@ void MachineController::update() {
 	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
 	SetAction(Actions::THRUST, (distance > 14.0f && dotProduct > 0.7f) || (distance < 8.0f && dotProduct < -0.7f));
 	SetAction(Actions::RETURN, (distance > 14.0f && dotProduct < -0.7f) || (distance < 8.0f && dotProduct > 0.7f));
-	SetAction(Actions::SHOOT, distance > 10.0f && distance < 20.0f && dotProduct > 0.95f);
+	SetAction(Actions::SHOOT, distance < 20.0f && dotProduct > 0.95f);
 	SetAction(Actions::COOL, parent_->GetWeapon()->GetHeatFactor() > 0.95f);
 }
 

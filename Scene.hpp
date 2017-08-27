@@ -15,6 +15,8 @@
 class Controller;
 class Planet;
 class Spaceship;
+class Collider;
+class Collision;
 
 class Scene {
 public:
@@ -24,6 +26,8 @@ public:
 	container::DynamicPool<Controller, unsigned int> controllers_;
 	container::DynamicPool<Projectile, unsigned int> projectiles_;
 	container::DynamicPool<Weapon, unsigned int> weaponSystems_;
+	container::DynamicPool<Collider, unsigned int> colliders_;
+	container::DynamicPool<Collision, unsigned int> collisions_;
 
 	Spaceship* ownShip_;
 
@@ -31,6 +35,7 @@ public:
 	void initialize();
 	virtual ~Scene();
 	void UpdatePhysics();
+	void UpdateCollisions();
 };
 
 #endif /* SCENE_HPP_ */
