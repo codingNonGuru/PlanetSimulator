@@ -32,6 +32,7 @@ public:
 	Mesh();
 	void initialize(Meshes);
 	void draw(glm::mat4&, glm::mat4&);
+	glm::vec2* GetVertex(int);
 	virtual ~Mesh();
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-enum class BoundingBoxes {POINT, CIRCLE};
+enum class BoundingBoxes {POINT, CIRCLE, MESH};
 
 class GameObject;
 

@@ -40,7 +40,7 @@ void Renderer::Initialize(Scene* scene)
 	shaderMap_->initialize(Shaders::POSTPROCESS, "Shaders/Postprocess.vert", "Shaders/Postprocess.frag", nullptr);
 	shaderMap_->initialize(Shaders::PARTICLES_COMPUTE, "Shaders/ParticlesCompute.comp", nullptr, nullptr);
 	shaderMap_->initialize(Shaders::PARTICLES_INSTANCED, "Shaders/ParticlesInstanced.vert", "Shaders/ParticlesInstanced.frag", nullptr);
-	shaderMap_->initialize(Shaders::SPACESHIP, "Shaders/Spaceship.vert", "Shaders/Spaceship.frag", nullptr);
+	shaderMap_->initialize(Shaders::MESH, "Shaders/Mesh.vert", "Shaders/Mesh.frag", nullptr);
 
 	GLuint key;
 	glGenVertexArrays(1, &key);

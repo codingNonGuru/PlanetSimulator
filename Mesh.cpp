@@ -33,7 +33,7 @@ void traceLine(int lineIndex, glm::vec2 start, glm::vec2 end, VertexSet* vertexS
 void Mesh::initialize(Meshes mesh) {
 	int lineCount;
 	if(mesh == Meshes::SPACESHIP)
-		lineCount = 5;
+		lineCount = 1;
 	else if(mesh == Meshes::PROJECTILE)
 		lineCount = 1;
 	else if(mesh == Meshes::GENERIC_QUAD)
@@ -47,20 +47,16 @@ void Mesh::initialize(Meshes mesh) {
 	vertexSet_.boneKeys_ = (GLuint*)malloc(sizeof(GLuint) * indexCount);
 
 	if(mesh == Meshes::SPACESHIP) {
-		glm::vec2 points[] = {
-			glm::vec2(30.0f, 3.0f),
-			glm::vec2(30.0f, -3.0f),
-			glm::vec2(-30.0f, -12.0f),
-			glm::vec2(-30.0f, 12.0f),
-		};
-		glm::vec2 arm = points[0] - points[3];
-		glm::vec2 armPerp(arm.y, -arm.x);
-		armPerp = glm::normalize(armPerp) * 5.0f;
-		traceLine(0, points[0], points[1], &vertexSet_, 1.0f, 0);
-		traceLine(1, points[1], points[2], &vertexSet_, 1.0f, 0);
-		traceLine(2, points[2], points[3], &vertexSet_, 1.0f, 0);
-		traceLine(3, points[3], points[0], &vertexSet_, 1.0f, 0);
-		traceLine(4, points[3] - armPerp, points[0] - armPerp, &vertexSet_, 1.0f, 1);
+		*(vertexSet_.vertices_ + 0) = glm::vec2(1.0f, 0.0f);
+		*(vertexSet_.vertices_ + 1) = glm::vec2(-0.2f, 0.45f);
+		*(vertexSet_.vertices_ + 2) = glm::vec2(-0.2f, -0.45f);
+		*(vertexSet_.vertices_ + 3) = glm::vec2(-0.5f, 0.0f);
+		vertexSet_.indices_[0] = 0;
+		vertexSet_.indices_[1] = 1;
+		vertexSet_.indices_[2] = 2;
+		vertexSet_.indices_[3] = 1;
+		vertexSet_.indices_[4] = 2;
+		vertexSet_.indices_[5] = 3;
 	}
 	else if(mesh == Meshes::PROJECTILE) {
 		glm::vec2 points[] = {
@@ -112,6 +108,11 @@ void Mesh::draw(glm::mat4 &viewMatrix, glm::mat4 &worldMatrix) {
 	glUniformMatrix4fv(1, 1, GL_FALSE, &worldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, elementCount_, GL_UNSIGNED_INT, (GLvoid*)0);
 	glBindVertexArray(0);
+}
+
+glm::vec2* Mesh::GetVertex(int index)
+{
+	return vertexSet_.vertices_ + *(vertexSet_.indices_ + index);
 }
 
 Mesh::~Mesh() {

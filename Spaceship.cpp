@@ -96,10 +96,10 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
 
 	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize(0.05f, 20.0f, 0.97f);
+	weapon_->initialize(0.02f, 20.0f, 0.97f);
 
 	collider_ = mainScene_->colliders_.allocate();
-	collider_->Initialize(this, BoundingBoxes::CIRCLE);
+	collider_->Initialize(this, BoundingBoxes::MESH);
 
 	sensor_ = Sensor();
 	cargo_ = Cargo();

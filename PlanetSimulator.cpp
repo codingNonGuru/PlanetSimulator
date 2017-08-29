@@ -83,8 +83,7 @@ void draw() {
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
-	Renderer::GetMap()->use(Shaders::SPRITE);
-	//Renderer::perlinTexture_->Bind(0, &Renderer::GetMap()->get(Shaders::SPRITE), "alpha");
+	/*Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[0].textureKey_);
 	glUniform2f(2, Engine::sprites_[0].scale_.x * 0.5f, Engine::sprites_[0].scale_.y * 0.5f);
 	glUniform1i(3, 0);
@@ -93,7 +92,15 @@ void draw() {
 			glUniform1f(4, 1.0f);
 			ship->draw(finalMatrix);
 		}
-	Renderer::GetMap()->unuse(Shaders::SPRITE);
+	Renderer::GetMap()->unuse(Shaders::SPRITE);*/
+
+	Renderer::GetMap()->use(Shaders::MESH);
+	for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
+		if(ship->isValid_) {
+			glUniform1f(2, ship->GetTransform()->scale_);
+			ship->draw(finalMatrix);
+		}
+	Renderer::GetMap()->unuse(Shaders::MESH);
 
 	Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
@@ -179,11 +186,11 @@ void initializeGraphics() {
 	Spaceship* ship = nullptr;
 	ship = mainScene.ships_.allocate();
 	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->initialize(true, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
+	ship->initialize(true, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
 	mainScene.ownShip_ = ship;
 	ship = mainScene.ships_.allocate();
 	transform = new Transform(Position(70.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
+	ship->initialize(false, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
 
 	Asteroid* asteroid;
 	for(int i = 0; i < 80; ++i)
