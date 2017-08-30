@@ -10,6 +10,7 @@
 #include "Planet.hpp"
 #include "Spaceship.hpp"
 #include "Collider.hpp"
+#include "Explosion.hpp"
 
 Scene::Scene() {
 	// TODO Auto-generated constructor stub
@@ -27,6 +28,7 @@ void Scene::initialize() {
 	weaponSystems_.initialize(512);
 	colliders_.initialize(2048);
 	collisions_.initialize(1024);
+	explosions_.initialize(256);
 
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship) {
 		ship->isValid_ = false;
@@ -45,6 +47,11 @@ void Scene::initialize() {
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid) {
 		asteroid->isValid_ = false;
 	}
+
+	for(Explosion* explosion = explosions_.getStart(); explosion != explosions_.getEnd(); ++explosion)
+	{
+		explosion->isValid_ = false;
+	}
 }
 
 void Scene::UpdateCollisions()
@@ -59,6 +66,8 @@ void Scene::UpdateCollisions()
 
 void Scene::UpdatePhysics()
 {
+	std::cout<<explosions_.getSize()<<"\n";
+
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)
 			asteroid->updateGravity();

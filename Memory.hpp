@@ -506,7 +506,7 @@ namespace container {
 		}
 	};
 
-	template<class O, typename I>
+	template<class O, typename I = unsigned int>
 	class DynamicPool {
 		O* objectStart_;
 		I size_;

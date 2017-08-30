@@ -18,6 +18,7 @@
 #include "Transform.hpp"
 #include "Utility.hpp"
 #include "Collider.hpp"
+#include "Explosion.hpp"
 
 Spaceship::Spaceship() {}
 
@@ -30,7 +31,7 @@ void Spaceship::updateLogic() {
 		weapon_->Fire();
 		float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.2f, 0.2f, 0.0f, 0.1f); // + utility::getRandom(-0.15f, 0.15f);
 		Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-		float speed = utility::getRandom(0.43f, 0.47f);
+		float speed = utility::getRandom(0.3f, 0.35f);
 		auto projectile = mainScene_->projectiles_.allocate();
 		Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
 		Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
@@ -96,7 +97,7 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
 
 	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize(0.02f, 20.0f, 0.97f);
+	weapon_->initialize(0.005f, 20.0f, 0.97f);
 
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::MESH);
@@ -107,12 +108,23 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 
 void Projectile::updateLogic() {
 	lifeTime_ += 0.01f;
-	if(lifeTime_ > 2.0f || collider_->collision_ != nullptr && collider_->collision_->collider_ != parent_)
+	bool hasCollided = collider_->collision_ != nullptr && collider_->collision_->collider_ != parent_;
+	if(lifeTime_ > 2.0f || hasCollided)
+	{
 		isWorking_ = false;
+		if(hasCollided)
+		{
+			Explosion* explosion = mainScene_->explosions_.allocate();
+			Transform* transform = new Transform();
+			*transform = *transform_;
+			transform->position_ -= rigidBody_->velocity_ * 0.5f;
+			explosion->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
+		}
+	}
 }
 
 void Projectile::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
+	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, isOrbiting);
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;

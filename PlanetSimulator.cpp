@@ -22,6 +22,7 @@
 #include "Renderer.hpp"
 #include "Utility.hpp"
 #include "Texture.hpp"
+#include "Explosion.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
@@ -104,7 +105,7 @@ void draw() {
 
 	Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
-	glUniform2f(2, Engine::sprites_[1].scale_.x, Engine::sprites_[1].scale_.y);
+	glUniform2f(2, Engine::sprites_[1].scale_.x * 0.5f, Engine::sprites_[1].scale_.y * 0.5f);
 	glUniform1i(3, 0);
 	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 		if(projectile->isValid_ && projectile->isWorking_) {
@@ -115,6 +116,16 @@ void draw() {
 			projectile->draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
+
+	Renderer::GetMap()->use(Shaders::EXPLOSION);
+	for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
+		if(explosion->isValid_ && explosion->isWorking_) {
+			glUniform1f(2, 5.0f);
+			glUniform1f(3, explosion->lifeTime_);
+			//glUniform1f(4, 1.0f);
+			explosion->draw(finalMatrix);
+		}
+	Renderer::GetMap()->unuse(Shaders::EXPLOSION);
 
 	/*materialAtlas.use(Shaders::PARTICLES_INSTANCED);
 	glBindVertexArray(particleVAO);
@@ -273,6 +284,13 @@ int main() {
 				ship->updateLogic();
 			}
 		}
+		for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
+		{
+			if(explosion->isValid_ && explosion->isWorking_)
+			{
+				explosion->updateLogic();
+			}
+		}
 		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 			if(projectile->isValid_ && projectile->isWorking_) {
 				projectile->updateLogic();
@@ -283,10 +301,15 @@ int main() {
 
 		draw();
 
-		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
+		for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 			if(projectile->isValid_ && !projectile->isWorking_) {
 				projectile->Destroy();
 				mainScene.projectiles_.deallocate(projectile);
+			}
+		for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
+			if(explosion->isValid_ && !explosion->isWorking_) {
+				explosion->Destroy();
+				mainScene.explosions_.deallocate(explosion);
 			}
 		SDL_GL_SwapWindow(Engine::window_);
 	}

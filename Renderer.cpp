@@ -22,7 +22,7 @@ container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.05f;
+float Renderer::zoomFactor_ = 0.03f;
 Texture* Renderer::perlinTexture_ = nullptr;
 
 void Renderer::Initialize(Scene* scene)
@@ -41,6 +41,7 @@ void Renderer::Initialize(Scene* scene)
 	shaderMap_->initialize(Shaders::PARTICLES_COMPUTE, "Shaders/ParticlesCompute.comp", nullptr, nullptr);
 	shaderMap_->initialize(Shaders::PARTICLES_INSTANCED, "Shaders/ParticlesInstanced.vert", "Shaders/ParticlesInstanced.frag", nullptr);
 	shaderMap_->initialize(Shaders::MESH, "Shaders/Mesh.vert", "Shaders/Mesh.frag", nullptr);
+	shaderMap_->initialize(Shaders::EXPLOSION, "Shaders/Explosion.vert", "Shaders/Explosion.frag", nullptr);
 
 	GLuint key;
 	glGenVertexArrays(1, &key);

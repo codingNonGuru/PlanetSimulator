@@ -17,17 +17,19 @@ class Planet;
 class Spaceship;
 class Collider;
 class Collision;
+class Explosion;
 
 class Scene {
 public:
-	container::DynamicPool<Spaceship, unsigned int> ships_;
-	container::DynamicPool<Asteroid, unsigned int> asteroids_;
-	container::DynamicPool<Planet, unsigned int> planets_;
-	container::DynamicPool<Controller, unsigned int> controllers_;
-	container::DynamicPool<Projectile, unsigned int> projectiles_;
-	container::DynamicPool<Weapon, unsigned int> weaponSystems_;
-	container::DynamicPool<Collider, unsigned int> colliders_;
-	container::DynamicPool<Collision, unsigned int> collisions_;
+	container::DynamicPool<Spaceship> ships_;
+	container::DynamicPool<Asteroid> asteroids_;
+	container::DynamicPool<Planet> planets_;
+	container::DynamicPool<Controller> controllers_;
+	container::DynamicPool<Projectile> projectiles_;
+	container::DynamicPool<Weapon> weaponSystems_;
+	container::DynamicPool<Collider> colliders_;
+	container::DynamicPool<Collision> collisions_;
+	container::DynamicPool<Explosion> explosions_;
 
 	Spaceship* ownShip_;
 

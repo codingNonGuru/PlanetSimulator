@@ -22,6 +22,7 @@ public:
 	Scale scale_;
 
 	Direction GetForward();
+	Transform() {}
 	Transform(Position, Rotation, Scale);
 	virtual ~Transform();
 };

@@ -11,6 +11,7 @@ enum class Shaders {
 	PARTICLES_INSTANCED,
 	MESH,
 	BODY,
+	EXPLOSION,
 	COUNT
 };
 
