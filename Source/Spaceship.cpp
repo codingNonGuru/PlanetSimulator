@@ -23,6 +23,12 @@
 Spaceship::Spaceship() {}
 
 void Spaceship::updateLogic() {
+	bool hasCollided = collider_->collision_ != nullptr && collider_->collision_->collider_->parent_ != this;
+	if(hasCollided)
+	{
+		hull_.Damage(nullptr);
+	}
+
 	controller_->update();
 	weapon_->update();
 
@@ -104,6 +110,7 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 
 	sensor_ = Sensor();
 	cargo_ = Cargo();
+	hull_.Initialize(1.0f);
 }
 
 void Projectile::updateLogic() {
@@ -164,4 +171,9 @@ void Weapon::Fire()
 void Weapon::Cool()
 {
 	isCooling_ = true;
+}
+
+void Hull::Damage(Projectile* projectile)
+{
+	currentIntegrity_ -= 0.01f;
 }

@@ -15,6 +15,8 @@
 typedef float Temperature;
 typedef float Power;
 
+class Projectile;
+
 class Weapon {
 public:
 	float lastFire_;
@@ -53,7 +55,12 @@ public:
 };
 
 class Hull {
+public:
+	float maximumIntegrity_;
+	float currentIntegrity_;
 
+	void Initialize(float integrity) {maximumIntegrity_ = integrity; currentIntegrity_ = integrity;}
+	void Damage(Projectile*);
 };
 
 class Cargo {
@@ -69,6 +76,7 @@ public:
 	Sensor sensor_;
 	Weapon *weapon_;
 	Cargo cargo_;
+	Hull hull_;
 
 	void updateLogic() override;
 	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
