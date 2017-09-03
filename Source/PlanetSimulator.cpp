@@ -23,6 +23,8 @@
 #include "Utility.hpp"
 #include "Texture.hpp"
 #include "Explosion.hpp"
+#include "Interface.hpp"
+#include "HealthBar.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
@@ -32,6 +34,7 @@ FramebufferAtlas framebuffers;
 GLuint posSSBO, velSSBO, particleCount = 1024;
 int frames = 0;
 Scene mainScene;
+Interface interface;
 
 void bindTexture(Shaders shader, const char* name, unsigned int index, unsigned int textureKey) {
 	glUniform1i(Renderer::GetMap()->getTextureLocation(shader, name), index);
@@ -80,7 +83,7 @@ void draw() {
 	for(Planet* planet = mainScene.planets_.getStart(); planet != mainScene.planets_.getEnd(); ++planet)
 		if(planet->isValid_) {
 			glUniform1i(3, 0);
-			planet->draw(finalMatrix);
+			planet->Draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
@@ -99,7 +102,7 @@ void draw() {
 	for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
 		if(ship->isValid_) {
 			glUniform1f(2, ship->GetTransform()->scale_);
-			ship->draw(finalMatrix);
+			ship->Draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::MESH);
 
@@ -113,7 +116,7 @@ void draw() {
 			if(speed > 1.0f)
 				speed = 1.0f;
 			glUniform1f(4, 3.0f * speed * speed - 2.0f * speed * speed * speed);
-			projectile->draw(finalMatrix);
+			projectile->Draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);
 
@@ -123,9 +126,19 @@ void draw() {
 			glUniform1f(2, 5.0f);
 			glUniform1f(3, explosion->lifeTime_);
 			//glUniform1f(4, 1.0f);
-			explosion->draw(finalMatrix);
+			explosion->Draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::EXPLOSION);
+
+	Renderer::GetMap()->use(Shaders::HEALTH_BAR);
+	for(HealthBar* bar = interface.healthBars_.getStart(); bar != interface.healthBars_.getEnd(); ++bar)
+		if(bar->IsValid()) {
+			glUniform1f(2, 5.0f);
+			glUniform1f(3, bar->GetShip()->hull_.GetDamage());
+			glUniform1f(4, bar->GetShip()->weapon_->GetHeatFactor());
+			bar->Draw(finalMatrix);
+		}
+	Renderer::GetMap()->unuse(Shaders::HEALTH_BAR);
 
 	/*materialAtlas.use(Shaders::PARTICLES_INSTANCED);
 	glBindVertexArray(particleVAO);
@@ -195,13 +208,20 @@ void initializeGraphics() {
 
 	Transform* transform = nullptr;
 	Spaceship* ship = nullptr;
+	HealthBar* healthBar = nullptr;
+
 	ship = mainScene.ships_.allocate();
 	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->initialize(true, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
+	ship->Initialize(true, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
 	mainScene.ownShip_ = ship;
+	healthBar = interface.healthBars_.allocate();
+	healthBar->Initialize(ship, &Engine::meshes_[Meshes::GENERIC_QUAD]);
+
 	ship = mainScene.ships_.allocate();
 	transform = new Transform(Position(70.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->initialize(false, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
+	ship->Initialize(false, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
+	healthBar = interface.healthBars_.allocate();
+	healthBar->Initialize(ship, &Engine::meshes_[Meshes::GENERIC_QUAD]);
 
 	Asteroid* asteroid;
 	for(int i = 0; i < 80; ++i)
@@ -210,7 +230,7 @@ void initializeGraphics() {
 		float angle = utility::getRandom(0.0f, 6.2831f);
 		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
 		transform = new Transform(Position(cos(angle) * radius, sin(angle) * radius, 0.0f), Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
-		asteroid->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, true);
+		asteroid->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, true);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
 		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
@@ -219,7 +239,7 @@ void initializeGraphics() {
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
 	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
-	planet->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
+	planet->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
 	planet->GetRigidBody()->angularMomentum_ = 0.001f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
@@ -265,6 +285,8 @@ void initializeSystem() {
 #endif
 	mainScene.initialize();
 	GameObject::mainScene_ = &mainScene;
+
+	interface.Initialize();
 
 	initializeGraphics();
 }

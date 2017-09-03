@@ -14,6 +14,7 @@ typedef glm::vec3 Position;
 typedef glm::vec3 Rotation;
 typedef glm::vec3 Direction;
 typedef float Scale;
+typedef glm::mat4 Matrix;
 
 class Transform {
 public:
@@ -24,6 +25,8 @@ public:
 	Direction GetForward();
 	Transform() {}
 	Transform(Position, Rotation, Scale);
+	Matrix GetMatrix();
+	Matrix GetPositionMatrix();
 	virtual ~Transform();
 };
 

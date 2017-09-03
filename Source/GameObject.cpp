@@ -17,7 +17,7 @@
 
 Scene* GameObject::mainScene_ = nullptr;
 
-void GameObject::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
 	parent_ = nullptr;
 	isValid_ = true;
 	isWorking_ = true;
@@ -66,9 +66,11 @@ void GameObject::updateGravity() {
 		rigidBody_->updateGravity(this);
 }
 
-void GameObject::draw(glm::mat4 &finalMatrix) {
-	glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), transform_->position_) * glm::rotate(glm::mat4(1.0f), transform_->rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+void GameObject::Draw(Matrix &finalMatrix) {
+	Matrix worldMatrix = glm::translate(Matrix(1.0f), transform_->position_) * glm::rotate(Matrix(1.0f), transform_->rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	mesh_->draw(finalMatrix, worldMatrix);
+
+	OnDraw(finalMatrix, worldMatrix);
 }
 
 void GameObject::Destroy()

@@ -366,6 +366,60 @@ Source/GameObject.cpp.s:
 	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/GameObject.cpp.s
 .PHONY : Source/GameObject.cpp.s
 
+Source/HealthBar.o: Source/HealthBar.cpp.o
+
+.PHONY : Source/HealthBar.o
+
+# target to build an object file
+Source/HealthBar.cpp.o:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/HealthBar.cpp.o
+.PHONY : Source/HealthBar.cpp.o
+
+Source/HealthBar.i: Source/HealthBar.cpp.i
+
+.PHONY : Source/HealthBar.i
+
+# target to preprocess a source file
+Source/HealthBar.cpp.i:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/HealthBar.cpp.i
+.PHONY : Source/HealthBar.cpp.i
+
+Source/HealthBar.s: Source/HealthBar.cpp.s
+
+.PHONY : Source/HealthBar.s
+
+# target to generate assembly for a file
+Source/HealthBar.cpp.s:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/HealthBar.cpp.s
+.PHONY : Source/HealthBar.cpp.s
+
+Source/Interface.o: Source/Interface.cpp.o
+
+.PHONY : Source/Interface.o
+
+# target to build an object file
+Source/Interface.cpp.o:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Interface.cpp.o
+.PHONY : Source/Interface.cpp.o
+
+Source/Interface.i: Source/Interface.cpp.i
+
+.PHONY : Source/Interface.i
+
+# target to preprocess a source file
+Source/Interface.cpp.i:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Interface.cpp.i
+.PHONY : Source/Interface.cpp.i
+
+Source/Interface.s: Source/Interface.cpp.s
+
+.PHONY : Source/Interface.s
+
+# target to generate assembly for a file
+Source/Interface.cpp.s:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Interface.cpp.s
+.PHONY : Source/Interface.cpp.s
+
 Source/Memory.o: Source/Memory.cpp.o
 
 .PHONY : Source/Memory.o
@@ -753,6 +807,12 @@ help:
 	@echo "... Source/GameObject.o"
 	@echo "... Source/GameObject.i"
 	@echo "... Source/GameObject.s"
+	@echo "... Source/HealthBar.o"
+	@echo "... Source/HealthBar.i"
+	@echo "... Source/HealthBar.s"
+	@echo "... Source/Interface.o"
+	@echo "... Source/Interface.i"
+	@echo "... Source/Interface.s"
 	@echo "... Source/Memory.o"
 	@echo "... Source/Memory.i"
 	@echo "... Source/Memory.s"

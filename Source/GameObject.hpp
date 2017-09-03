@@ -18,6 +18,7 @@ class Scene;
 class Weapon;
 class Collider;
 class Collision;
+typedef glm::mat4 Matrix;
 
 class GameObject {
 public:
@@ -31,8 +32,9 @@ public:
 	Collider* collider_;
 	bool isValid_, isWorking_;
 
-	virtual void initialize(bool, Mesh*, Transform*, float, bool, bool);
-	virtual void draw(glm::mat4&);
+	virtual void Initialize(bool, Mesh*, Transform*, float, bool, bool);
+	virtual void Draw(Matrix&);
+	virtual void OnDraw(Matrix&, Matrix&) {}
 	virtual void updatePhysics();
 	virtual void UpdateCollisions();
 	virtual void updateGravity();

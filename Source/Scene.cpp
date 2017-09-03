@@ -65,7 +65,7 @@ void Scene::UpdateCollisions()
 
 void Scene::UpdatePhysics()
 {
-	std::cout<<ownShip_->hull_.currentIntegrity_<<"\n";
+	//std::cout<<ownShip_->weapon_->GetHeatFactor()<<"\n";
 
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)

@@ -42,6 +42,7 @@ void Renderer::Initialize(Scene* scene)
 	shaderMap_->initialize(Shaders::PARTICLES_INSTANCED, "Shaders/ParticlesInstanced.vert", "Shaders/ParticlesInstanced.frag", nullptr);
 	shaderMap_->initialize(Shaders::MESH, "Shaders/Mesh.vert", "Shaders/Mesh.frag", nullptr);
 	shaderMap_->initialize(Shaders::EXPLOSION, "Shaders/Explosion.vert", "Shaders/Explosion.frag", nullptr);
+	shaderMap_->initialize(Shaders::HEALTH_BAR, "Shaders/HealthBar.vert", "Shaders/HealthBar.frag", nullptr);
 
 	GLuint key;
 	glGenVertexArrays(1, &key);

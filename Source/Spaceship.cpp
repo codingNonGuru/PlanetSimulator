@@ -19,6 +19,7 @@
 #include "Utility.hpp"
 #include "Collider.hpp"
 #include "Explosion.hpp"
+#include "HealthBar.hpp"
 
 Spaceship::Spaceship() {}
 
@@ -36,7 +37,7 @@ void Spaceship::updateLogic() {
 		Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
 		Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
 		Transform* transform = new Transform(position, rotation, 1.0f);
-		projectile->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, speed, false, false);
+		projectile->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, speed, false, false);
 		projectile->SetParent(this);
 	}
 	if(controller_->IsActing(Actions::STEER_LEFT)) {
@@ -93,8 +94,8 @@ Spaceship::~Spaceship() {
 	// TODO Auto-generated destructor stub
 }
 
-void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
+void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+	GameObject::Initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
 
 	weapon_ = mainScene_->weaponSystems_.allocate();
 	weapon_->initialize(0.001f, 20.0f, 0.97f);
@@ -105,6 +106,14 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 	sensor_ = Sensor();
 	cargo_ = Cargo();
 	hull_.Initialize(1.0f);
+}
+
+void Spaceship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
+{
+	if(!healthBar_)
+		return;
+
+	//healthBar_->GetMesh()->draw(finalMatrix, worldMatrix);
 }
 
 void Spaceship::Collide(Collision* collision)
@@ -124,8 +133,8 @@ void Projectile::updateLogic() {
 	}
 }
 
-void Projectile::initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, isOrbiting);
+void Projectile::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+	GameObject::Initialize(isPlayer, mesh, transform, impulse, hasDrag, isOrbiting);
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;
@@ -141,7 +150,7 @@ void Projectile::Collide(Collision* collision)
 		Transform* transform = new Transform();
 		*transform = *transform_;
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
-		explosion->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
+		explosion->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
 	}
 }
 

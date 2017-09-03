@@ -16,6 +16,7 @@ typedef float Temperature;
 typedef float Power;
 
 class Projectile;
+class HealthBar;
 
 class Weapon {
 public:
@@ -61,6 +62,7 @@ public:
 
 	void Initialize(float integrity) {maximumIntegrity_ = integrity; currentIntegrity_ = integrity;}
 	void Damage(Projectile*);
+	float GetDamage() const {return currentIntegrity_ / maximumIntegrity_;}
 };
 
 class Cargo {
@@ -78,8 +80,11 @@ public:
 	Cargo cargo_;
 	Hull hull_;
 
+	HealthBar* healthBar_;
+
 	void updateLogic() override;
-	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
+	void Initialize(bool, Mesh*, Transform*, float, bool, bool) override;
+	void OnDraw(Matrix&, Matrix&) override;
 	Spaceship();
 	virtual ~Spaceship();
 	bool IsControlled() override {return true;}
@@ -91,7 +96,7 @@ class Projectile : public GameObject {
 public:
 	float lifeTime_;
 
-	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
+	void Initialize(bool, Mesh*, Transform*, float, bool, bool) override;
 	void updateLogic() override;
 	void Collide(Collision*) override;
 };
