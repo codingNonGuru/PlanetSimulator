@@ -27,7 +27,6 @@ void Scene::initialize() {
 	projectiles_.initialize(1024);
 	weaponSystems_.initialize(512);
 	colliders_.initialize(2048);
-	collisions_.initialize(1024);
 	explosions_.initialize(256);
 
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship) {
@@ -66,7 +65,7 @@ void Scene::UpdateCollisions()
 
 void Scene::UpdatePhysics()
 {
-	std::cout<<explosions_.getSize()<<"\n";
+	std::cout<<ownShip_->hull_.currentIntegrity_<<"\n";
 
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)

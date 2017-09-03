@@ -8,7 +8,6 @@ void Collider::Initialize(GameObject* parent, BoundingBoxes boundingBox)
 {
 	parent_ = parent;
 	boundingBox_ = boundingBox;
-	collision_ = nullptr;
 }
 
 void Collider::Update()
@@ -17,12 +16,6 @@ void Collider::Update()
 
 	if(!scene)
 		return;
-
-	if(collision_)
-	{
-		scene->collisions_.deallocate(collision_);
-		collision_ = nullptr;
-	}
 
 	for(Projectile* projectile = scene->projectiles_.getStart(); projectile != scene->projectiles_.getEnd(); ++projectile)
 	{
@@ -155,14 +148,10 @@ void Collider::AllocateCollision(GameObject* otherObject)
 	if(!scene)
 		nullptr;
 
-	if(collision_)
-	{
-		scene->collisions_.deallocate(collision_);
-		collision_ = nullptr;
-	}
+	Collision collision;
+	collision.Initialize(otherObject);
 
-	collision_ = scene->collisions_.allocate();
-	collision_->Initialize(otherObject);
+	otherObject->Collide(&collision);
 }
 
 void Collision::Initialize(GameObject* other)

@@ -23,12 +23,6 @@
 Spaceship::Spaceship() {}
 
 void Spaceship::updateLogic() {
-	bool hasCollided = collider_->collision_ != nullptr && collider_->collision_->collider_->parent_ != this;
-	if(hasCollided)
-	{
-		hull_.Damage(nullptr);
-	}
-
 	controller_->update();
 	weapon_->update();
 
@@ -37,7 +31,7 @@ void Spaceship::updateLogic() {
 		weapon_->Fire();
 		float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.2f, 0.2f, 0.0f, 0.1f); // + utility::getRandom(-0.15f, 0.15f);
 		Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-		float speed = utility::getRandom(0.3f, 0.35f);
+		float speed = utility::getRandom(0.4f, 0.45f);
 		auto projectile = mainScene_->projectiles_.allocate();
 		Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
 		Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
@@ -103,7 +97,7 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 	GameObject::initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
 
 	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize(0.005f, 20.0f, 0.97f);
+	weapon_->initialize(0.001f, 20.0f, 0.97f);
 
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::MESH);
@@ -113,20 +107,20 @@ void Spaceship::initialize(bool isPlayer, Mesh* mesh, Transform* transform, floa
 	hull_.Initialize(1.0f);
 }
 
+void Spaceship::Collide(Collision* collision)
+{
+	bool isCollisionValid = collision->collider_->parent_ != this;
+	if(isCollisionValid)
+	{
+		hull_.Damage(nullptr);
+	}
+}
+
 void Projectile::updateLogic() {
 	lifeTime_ += 0.01f;
-	bool hasCollided = collider_->collision_ != nullptr && collider_->collision_->collider_ != parent_;
-	if(lifeTime_ > 2.0f || hasCollided)
+	if(lifeTime_ > 2.0f)
 	{
 		isWorking_ = false;
-		if(hasCollided)
-		{
-			Explosion* explosion = mainScene_->explosions_.allocate();
-			Transform* transform = new Transform();
-			*transform = *transform_;
-			transform->position_ -= rigidBody_->velocity_ * 0.5f;
-			explosion->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
-		}
 	}
 }
 
@@ -135,6 +129,20 @@ void Projectile::initialize(bool isPlayer, Mesh* mesh, Transform* transform, flo
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;
+}
+
+void Projectile::Collide(Collision* collision)
+{
+	bool isCollisionValid = collision->collider_ != parent_;
+	if(isCollisionValid)
+	{
+		isWorking_ = false;
+		Explosion* explosion = mainScene_->explosions_.allocate();
+		Transform* transform = new Transform();
+		*transform = *transform_;
+		transform->position_ -= rigidBody_->velocity_ * 0.5f;
+		explosion->initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
+	}
 }
 
 void Weapon::initialize(float fireSpeed, Temperature overheatPoint, float coolingRate) {

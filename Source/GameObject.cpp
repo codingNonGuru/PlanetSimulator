@@ -95,11 +95,6 @@ void GameObject::Destroy()
 
 	if(collider_)
 	{
-		if(collider_->collision_)
-		{
-			mainScene_->collisions_.deallocate(collider_->collision_);
-		}
-
 		mainScene_->colliders_.deallocate(collider_);
 		collider_ = nullptr;
 	}

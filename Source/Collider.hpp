@@ -17,7 +17,6 @@ class Collider
 public:
 	GameObject* parent_;
 	BoundingBoxes boundingBox_;
-	Collision* collision_;
 
 	void Initialize(GameObject*, BoundingBoxes);
 	void Update();

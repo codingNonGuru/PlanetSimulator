@@ -17,6 +17,7 @@ class Controller;
 class Scene;
 class Weapon;
 class Collider;
+class Collision;
 
 class GameObject {
 public:
@@ -44,6 +45,7 @@ public:
 	virtual Weapon* GetWeapon() {return nullptr;}
 	virtual bool IsControlled() {return false;}
 	void SetParent(GameObject* parent) {parent_ = parent;}
+	virtual void Collide(Collision*) {}
 	void Destroy();
 };
 

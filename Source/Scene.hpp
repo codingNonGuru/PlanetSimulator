@@ -16,7 +16,6 @@ class Controller;
 class Planet;
 class Spaceship;
 class Collider;
-class Collision;
 class Explosion;
 
 class Scene {
@@ -28,7 +27,6 @@ public:
 	container::DynamicPool<Projectile> projectiles_;
 	container::DynamicPool<Weapon> weaponSystems_;
 	container::DynamicPool<Collider> colliders_;
-	container::DynamicPool<Collision> collisions_;
 	container::DynamicPool<Explosion> explosions_;
 
 	Spaceship* ownShip_;

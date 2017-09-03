@@ -84,6 +84,7 @@ public:
 	virtual ~Spaceship();
 	bool IsControlled() override {return true;}
 	Weapon* GetWeapon() override {return weapon_;}
+	void Collide(Collision*) override;
 };
 
 class Projectile : public GameObject {
@@ -92,6 +93,7 @@ public:
 
 	void initialize(bool, Mesh*, Transform*, float, bool, bool) override;
 	void updateLogic() override;
+	void Collide(Collision*) override;
 };
 
 #endif /* SPACESHIP_HPP_ */
