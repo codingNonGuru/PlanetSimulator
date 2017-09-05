@@ -9,7 +9,8 @@
 
 #include "Mesh.hpp"
 
-Mesh::Mesh() {
+Mesh::Mesh()
+{
 }
 
 GLuint indexStencil[] = {0, 1, 2, 1, 2, 3};
@@ -31,39 +32,47 @@ void traceLine(int lineIndex, glm::vec2 start, glm::vec2 end, VertexSet* vertexS
 }
 
 void Mesh::initialize(Meshes mesh) {
-	int lineCount;
-	if(mesh == Meshes::SPACESHIP)
-		lineCount = 1;
-	else if(mesh == Meshes::PROJECTILE)
-		lineCount = 1;
+	int vertexCount, indexCount;
+	if(mesh == Meshes::SPACESHIP_SCOUT)
+	{
+		vertexCount = 3;
+		indexCount = 3;
+	}
+	else if(mesh == Meshes::SPACESHIP_CORVETTE)
+	{
+		vertexCount = 4;
+		indexCount = 6;
+	}
 	else if(mesh == Meshes::GENERIC_QUAD)
-		lineCount = 1;
+	{
+		vertexCount = 4;
+		indexCount = 6;
+	}
 
-	int vertexCount = lineCount * 4;
-	int indexCount = lineCount * 6;
 	elementCount_ = indexCount;
 	vertexSet_.vertices_ = (glm::vec2*)malloc(sizeof(glm::vec2) * vertexCount);
 	vertexSet_.indices_ = (GLuint*)malloc(sizeof(GLuint) * indexCount);
 	vertexSet_.boneKeys_ = (GLuint*)malloc(sizeof(GLuint) * indexCount);
 
-	if(mesh == Meshes::SPACESHIP) {
-		*(vertexSet_.vertices_ + 0) = glm::vec2(1.0f, 0.0f);
-		*(vertexSet_.vertices_ + 1) = glm::vec2(-0.2f, 0.45f);
-		*(vertexSet_.vertices_ + 2) = glm::vec2(-0.2f, -0.45f);
-		*(vertexSet_.vertices_ + 3) = glm::vec2(-0.5f, 0.0f);
+	if(mesh == Meshes::SPACESHIP_SCOUT) {
+		*(vertexSet_.vertices_ + 0) = glm::vec2(0.5f, 0.0f);
+		*(vertexSet_.vertices_ + 1) = glm::vec2(-0.25f, 0.3f);
+		*(vertexSet_.vertices_ + 2) = glm::vec2(-0.25f, -0.3f);
+		vertexSet_.indices_[0] = 0;
+		vertexSet_.indices_[1] = 1;
+		vertexSet_.indices_[2] = 2;
+	}
+	else if(mesh == Meshes::SPACESHIP_CORVETTE) {
+		*(vertexSet_.vertices_ + 0) = glm::vec2(0.9f, 0.0f);
+		*(vertexSet_.vertices_ + 1) = glm::vec2(-0.3f, 0.45f);
+		*(vertexSet_.vertices_ + 2) = glm::vec2(-0.3f, -0.45f);
+		*(vertexSet_.vertices_ + 3) = glm::vec2(-0.6f, 0.0f);
 		vertexSet_.indices_[0] = 0;
 		vertexSet_.indices_[1] = 1;
 		vertexSet_.indices_[2] = 2;
 		vertexSet_.indices_[3] = 1;
 		vertexSet_.indices_[4] = 2;
 		vertexSet_.indices_[5] = 3;
-	}
-	else if(mesh == Meshes::PROJECTILE) {
-		glm::vec2 points[] = {
-			glm::vec2(3.0f, 0.0f),
-			glm::vec2(-3.0f, 0.0f)
-		};
-		traceLine(0, points[0], points[1], &vertexSet_, 1.0f, 0);
 	}
 	else if(mesh == Meshes::GENERIC_QUAD) {
 		*(vertexSet_.vertices_ + 0) = glm::vec2(-0.5f, -0.5f);

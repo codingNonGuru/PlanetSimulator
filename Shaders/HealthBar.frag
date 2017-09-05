@@ -27,20 +27,19 @@ void main() {
 	
 	float alpha = 0.0f;
 	
-		
 	float angle = atan2(pos.y, pos.x);
 	if(angle < 0.0f)
 		angle += 6.2831f;
 	
 	if(dist > 0.38f && dist < 0.41f)
 	{
-		alpha = 0.8f;
+		alpha = 0.4f;
 		if(angle > healthFactor * 6.2831f)
-			alpha = 0.4f;
+			alpha = 0.2f;
 	}
 	if(dist > 0.45f && dist < 0.47f)
 	{
-		alpha = 0.8f;
+		alpha = 0.4f;
 		float lowerLimit = 3.1415f - 0.6f;
 		float upperLimit = 3.1415f + 0.6f; 
 		if(angle < lowerLimit || angle > upperLimit)
@@ -51,7 +50,7 @@ void main() {
 		{
 			if(angle > lowerLimit + 1.2f * coolFactor)
 			{
-				alpha = 0.4f;
+				alpha = 0.2f;
 			}
 		}
 	}

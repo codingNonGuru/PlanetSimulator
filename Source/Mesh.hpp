@@ -12,8 +12,13 @@
 
 typedef unsigned int GLuint;
 
-enum class Meshes {
-	GENERIC_QUAD, SPACESHIP, PROJECTILE, COUNT
+enum class Meshes
+{
+	GENERIC_QUAD,
+	SPACESHIP_SCOUT,
+	SPACESHIP_CORVETTE,
+	PROJECTILE,
+	COUNT
 };
 
 class VertexSet {

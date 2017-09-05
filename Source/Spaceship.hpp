@@ -83,12 +83,13 @@ public:
 	HealthBar* healthBar_;
 
 	void updateLogic() override;
-	void Initialize(bool, Mesh*, Transform*, float, bool, bool) override;
+	void Initialize(bool, Mesh*, Transform*, RigidBody*) override;
 	void OnDraw(Matrix&, Matrix&) override;
 	Spaceship();
 	virtual ~Spaceship();
 	bool IsControlled() override {return true;}
 	Weapon* GetWeapon() override {return weapon_;}
+	Hull* GetHull() {return &hull_;}
 	void Collide(Collision*) override;
 };
 
@@ -96,7 +97,7 @@ class Projectile : public GameObject {
 public:
 	float lifeTime_;
 
-	void Initialize(bool, Mesh*, Transform*, float, bool, bool) override;
+	void Initialize(bool, Mesh*, Transform*, RigidBody*) override;
 	void updateLogic() override;
 	void Collide(Collision*) override;
 };

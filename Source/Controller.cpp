@@ -35,8 +35,16 @@ void MachineController::update() {
 	float distance;
 	for(Spaceship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
 	{
-		if(ship->isValid_ && ship != parent_)
+		if(ship->isValid_ && ship->isWorking_ && ship != parent_)
 			otherShip = ship;
+	}
+
+	if(!otherShip)
+	{
+		for(int i = 0; i < (int)Actions::COUNT; ++i)
+			actions_[i] = false;
+
+		return;
 	}
 
 	glm::vec3 direction = otherShip->GetTransform()->position_ - parent_->GetTransform()->position_;

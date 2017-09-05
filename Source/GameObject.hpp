@@ -25,6 +25,7 @@ public:
 	static Scene* mainScene_;
 
 	GameObject* parent_;
+	char name_[16];
 	Mesh* mesh_;
 	Transform* transform_;
 	RigidBody* rigidBody_;
@@ -32,7 +33,7 @@ public:
 	Collider* collider_;
 	bool isValid_, isWorking_;
 
-	virtual void Initialize(bool, Mesh*, Transform*, float, bool, bool);
+	virtual void Initialize(bool, Mesh*, Transform*, RigidBody*);
 	virtual void Draw(Matrix&);
 	virtual void OnDraw(Matrix&, Matrix&) {}
 	virtual void updatePhysics();

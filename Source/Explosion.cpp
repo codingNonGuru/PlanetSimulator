@@ -1,8 +1,8 @@
 #include "Explosion.hpp"
 
-void Explosion::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting)
+void Explosion::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
 {
-	GameObject::Initialize(isPlayer, mesh, transform, impulse, hasDrag, isOrbiting);
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
 	lifeTime_ = 0.0f;
 }
 

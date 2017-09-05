@@ -18,32 +18,21 @@
 RigidBody::RigidBody() {
 }
 
-void RigidBody::initialize(GameObject* parent, float impulse, bool hasDrag, bool isOrbiting) {
-	float angle = parent->transform_->rotation_.z;
-	velocity_ = glm::vec3(cos(angle), sin(angle), 0.0f) * impulse;
+RigidBody::RigidBody(GameObject* parent, float mass, float drag)
+{
+	Initialize(parent, mass, drag);
+}
+
+void RigidBody::Initialize(GameObject* parent, float mass, float drag)
+{
+	parent_ = parent;
 	angularMomentum_ = 0.0f;
-	drag_ = isOrbiting == false ? 0.995f : 1.0f;
+	drag_ = drag;
 	angularDrag_ = 0.95f;
 	mass_ = 1.0f;
-
-	if(isOrbiting)
-	{
-		float distance = glm::length(parent->transform_->position_);
-		glm::vec3 direction = parent->transform_->position_ / distance;
-		velocity_ = glm::vec3(direction.y, -direction.x, 0.0f) * sqrt(0.5f / distance);
-	}
 }
 
 void RigidBody::update(Transform* transform) {
-	/*if(controller != nullptr) {
-		if(controller->isActing(Actions::STEER_RIGHT) == true)
-			angularMomentum_ += 0.002f;
-		else if(controller->isActing(Actions::STEER_LEFT) == true)
-			angularMomentum_ -= 0.002f;
-		float angle = transform->rotation_.z;
-		if(controller->isActing(Actions::THRUST) == true)
-			velocity_ += glm::vec3(cos(angle), sin(angle), 0.0f) * 0.01f;
-	}*/
 	transform->position_ += velocity_;
 	transform->rotation_.z += angularMomentum_;
 	velocity_ *= drag_;
@@ -67,8 +56,25 @@ void RigidBody::Spin(float impulse) {
 	angularMomentum_ += impulse;
 }
 
-void RigidBody::Drag(glm::vec3 impulse) {
+void RigidBody::Push(Direction impulse)
+{
 	velocity_ += impulse;
+}
+
+void RigidBody::PushForward(float impulse)
+{
+	velocity_ += parent_->GetTransform()->GetForward() * impulse;
+}
+
+void RigidBody::AddOrbitalVelocity(GameObject* attractor)
+{
+	if(attractor == nullptr)
+		return;
+
+	Direction direction = parent_->transform_->position_ - attractor->GetTransform()->position_;
+	float distance = glm::length(direction);
+	Direction orbitalVelocity = direction / distance;
+	velocity_ += glm::vec3(orbitalVelocity.y, -orbitalVelocity.x, 0.0f) * sqrt(0.5f / distance);
 }
 
 RigidBody::~RigidBody() {

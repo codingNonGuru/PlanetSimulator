@@ -5,6 +5,7 @@
  *      Author: andrei
  */
 
+#include <string.h>
 #include <iostream>
 #include <math.h>
 
@@ -24,37 +25,48 @@
 Spaceship::Spaceship() {}
 
 void Spaceship::updateLogic() {
+	if(hull_.GetDamage() <= 0.0f)
+	{
+		isWorking_ = false;
+		return;
+	}
+
 	controller_->update();
 	weapon_->update();
 
-	Direction forward = transform_->GetForward();
 	if(controller_->IsActing(Actions::SHOOT) && weapon_->CanFire()) {
 		weapon_->Fire();
-		float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.2f, 0.2f, 0.0f, 0.1f); // + utility::getRandom(-0.15f, 0.15f);
-		Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-		float speed = utility::getRandom(0.4f, 0.45f);
-		auto projectile = mainScene_->projectiles_.allocate();
-		Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
-		Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
-		Transform* transform = new Transform(position, rotation, 1.0f);
-		projectile->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, speed, false, false);
-		projectile->SetParent(this);
+		{
+			auto projectile = mainScene_->projectiles_.allocate();
+
+			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.15f, 0.15f, 0.0f, 0.05f);
+			Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
+			float speed = utility::getRandom(0.58f, 0.6f);
+
+			Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
+			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
+			Transform* transform = new Transform(position, rotation, 1.0f);
+			RigidBody* rigidBody = new RigidBody(projectile, 1.0f, 0.995f);
+			projectile->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+			rigidBody->PushForward(speed);
+			projectile->SetParent(this);
+		}
 	}
 	if(controller_->IsActing(Actions::STEER_LEFT)) {
-		if(rigidBody_ != nullptr)
+		if(rigidBody_)
 			rigidBody_->Spin(-0.001f);
 	}
 	if(controller_->IsActing(Actions::STEER_RIGHT)) {
-		if(rigidBody_ != nullptr)
+		if(rigidBody_)
 			rigidBody_->Spin(0.001f);
 	}
 	if(controller_->IsActing(Actions::THRUST)) {
-		if(rigidBody_ != nullptr)
-			rigidBody_->Drag(forward * 0.0015f);
+		if(rigidBody_)
+			rigidBody_->PushForward(0.0015f);
 	}
 	if(controller_->IsActing(Actions::RETURN)) {
-		if(rigidBody_ != nullptr)
-			rigidBody_->Drag(-forward * 0.0015f);
+		if(rigidBody_)
+			rigidBody_->PushForward(-0.0015f);
 	}
 	if(controller_->IsActing(Actions::COOL)) {
 		weapon_->Cool();
@@ -94,18 +106,17 @@ Spaceship::~Spaceship() {
 	// TODO Auto-generated destructor stub
 }
 
-void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::Initialize(isPlayer, mesh, transform, impulse, hasDrag, false);
-
-	weapon_ = mainScene_->weaponSystems_.allocate();
-	weapon_->initialize(0.001f, 20.0f, 0.97f);
+void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody) {
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
+	strcpy(name_, "spaceship");
 
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::MESH);
 
+	weapon_ = mainScene_->weaponSystems_.allocate();
+
 	sensor_ = Sensor();
 	cargo_ = Cargo();
-	hull_.Initialize(1.0f);
 }
 
 void Spaceship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
@@ -127,14 +138,16 @@ void Spaceship::Collide(Collision* collision)
 
 void Projectile::updateLogic() {
 	lifeTime_ += 0.01f;
-	if(lifeTime_ > 2.0f)
+	if(lifeTime_ > 3.0f)
 	{
 		isWorking_ = false;
 	}
 }
 
-void Projectile::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
-	GameObject::Initialize(isPlayer, mesh, transform, impulse, hasDrag, isOrbiting);
+void Projectile::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
+{
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
+	strcpy(name_, "projectile");
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;
@@ -150,7 +163,7 @@ void Projectile::Collide(Collision* collision)
 		Transform* transform = new Transform();
 		*transform = *transform_;
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
-		explosion->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, false, false);
+		explosion->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, nullptr);
 	}
 }
 

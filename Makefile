@@ -285,6 +285,33 @@ Source/Explosion.cpp.s:
 	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Explosion.cpp.s
 .PHONY : Source/Explosion.cpp.s
 
+Source/Factory.o: Source/Factory.cpp.o
+
+.PHONY : Source/Factory.o
+
+# target to build an object file
+Source/Factory.cpp.o:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Factory.cpp.o
+.PHONY : Source/Factory.cpp.o
+
+Source/Factory.i: Source/Factory.cpp.i
+
+.PHONY : Source/Factory.i
+
+# target to preprocess a source file
+Source/Factory.cpp.i:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Factory.cpp.i
+.PHONY : Source/Factory.cpp.i
+
+Source/Factory.s: Source/Factory.cpp.s
+
+.PHONY : Source/Factory.s
+
+# target to generate assembly for a file
+Source/Factory.cpp.s:
+	$(MAKE) -f CMakeFiles/PlanetSimulator.dir/build.make CMakeFiles/PlanetSimulator.dir/Source/Factory.cpp.s
+.PHONY : Source/Factory.cpp.s
+
 Source/Fractal.o: Source/Fractal.cpp.o
 
 .PHONY : Source/Fractal.o
@@ -798,6 +825,9 @@ help:
 	@echo "... Source/Explosion.o"
 	@echo "... Source/Explosion.i"
 	@echo "... Source/Explosion.s"
+	@echo "... Source/Factory.o"
+	@echo "... Source/Factory.i"
+	@echo "... Source/Factory.s"
 	@echo "... Source/Fractal.o"
 	@echo "... Source/Fractal.i"
 	@echo "... Source/Fractal.s"

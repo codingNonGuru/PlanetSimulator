@@ -17,14 +17,14 @@
 
 Scene* GameObject::mainScene_ = nullptr;
 
-void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, float impulse, bool hasDrag, bool isOrbiting) {
+void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody) {
 	parent_ = nullptr;
 	isValid_ = true;
 	isWorking_ = true;
-	transform_ = transform;
 
-	rigidBody_ = new RigidBody();
-	rigidBody_->initialize(this, impulse, hasDrag, isOrbiting);
+	mesh_ = mesh;
+	transform_ = transform;
+	rigidBody_ = rigidBody;
 
 	if(IsControlled())
 	{
@@ -37,8 +37,6 @@ void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, flo
 	}
 	else
 		controller_ = nullptr;
-
-	mesh_ = mesh;
 }
 
 GameObject::GameObject() {
@@ -76,6 +74,7 @@ void GameObject::Draw(Matrix &finalMatrix) {
 void GameObject::Destroy()
 {
 	isValid_ = false;
+	parent_ = nullptr;
 
 	if(controller_)
 	{

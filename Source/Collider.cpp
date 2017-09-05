@@ -141,15 +141,11 @@ void Collider::Resolve(GameObject* otherObject)
 	}
 }
 
+Collision collision;
+
 void Collider::AllocateCollision(GameObject* otherObject)
 {
-	Scene* scene = GameObject::mainScene_;
-
-	if(!scene)
-		nullptr;
-
-	Collision collision;
-	collision.Initialize(otherObject);
+	collision.Initialize(parent_);
 
 	otherObject->Collide(&collision);
 }

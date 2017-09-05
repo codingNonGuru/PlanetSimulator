@@ -25,6 +25,7 @@
 #include "Explosion.hpp"
 #include "Interface.hpp"
 #include "HealthBar.hpp"
+#include "Factory.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
@@ -112,7 +113,7 @@ void draw() {
 	glUniform1i(3, 0);
 	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
 		if(projectile->isValid_ && projectile->isWorking_) {
-			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 2.0f;
+			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 2.5f;
 			if(speed > 1.0f)
 				speed = 1.0f;
 			glUniform1f(4, 3.0f * speed * speed - 2.0f * speed * speed * speed);
@@ -132,7 +133,7 @@ void draw() {
 
 	Renderer::GetMap()->use(Shaders::HEALTH_BAR);
 	for(HealthBar* bar = interface.healthBars_.getStart(); bar != interface.healthBars_.getEnd(); ++bar)
-		if(bar->IsValid()) {
+		if(bar->IsValid() && bar->IsWorking()) {
 			glUniform1f(2, 5.0f);
 			glUniform1f(3, bar->GetShip()->hull_.GetDamage());
 			glUniform1f(4, bar->GetShip()->weapon_->GetHeatFactor());
@@ -203,25 +204,41 @@ void initializeGraphics() {
 		);
 
 	Engine::meshes_.initialize(Meshes::GENERIC_QUAD);
-	Engine::meshes_.initialize(Meshes::SPACESHIP);
+	Engine::meshes_.initialize(Meshes::SPACESHIP_SCOUT);
+	Engine::meshes_.initialize(Meshes::SPACESHIP_CORVETTE);
 	Engine::meshes_.initialize(Meshes::PROJECTILE);
 
 	Transform* transform = nullptr;
+	RigidBody* rigidBody = nullptr;
 	Spaceship* ship = nullptr;
 	HealthBar* healthBar = nullptr;
 
-	ship = mainScene.ships_.allocate();
-	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->Initialize(true, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
-	mainScene.ownShip_ = ship;
-	healthBar = interface.healthBars_.allocate();
-	healthBar->Initialize(ship, &Engine::meshes_[Meshes::GENERIC_QUAD]);
+	ShipFactory::SetScene(&mainScene);
+	ShipFactory::SetInterface(&interface);
 
-	ship = mainScene.ships_.allocate();
-	transform = new Transform(Position(70.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-	ship->Initialize(false, &Engine::meshes_[Meshes::SPACESHIP], transform, 0.0f, true, false);
-	healthBar = interface.healthBars_.allocate();
-	healthBar->Initialize(ship, &Engine::meshes_[Meshes::GENERIC_QUAD]);
+	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
+	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
+	mainScene.ownShip_ = ship;
+
+	for(int i = 0; i < 3; ++i)
+	{
+		for(int j = 0; j < 2; ++j)
+		{
+			transform = new Transform(Position(100.0f + (float)i * 5.0f, 5.0f + (float)j * 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
+			ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
+		}
+	}
+
+	//transform = new Transform(Position(100.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
+	//ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
+
+	Planet* planet;
+	planet = mainScene.planets_.allocate();
+	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
+	rigidBody = new RigidBody(planet, 1.0f, 1.0f);
+	planet->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+	planet->GetRigidBody()->angularMomentum_ = 0.001f;
+	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
 	Asteroid* asteroid;
 	for(int i = 0; i < 80; ++i)
@@ -229,19 +246,15 @@ void initializeGraphics() {
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
 		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
-		transform = new Transform(Position(cos(angle) * radius, sin(angle) * radius, 0.0f), Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
-		asteroid->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, true);
+		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
+		transform = new Transform(position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
+		rigidBody = new RigidBody(asteroid, 1.0f, 1.0f);
+		asteroid->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+		rigidBody->AddOrbitalVelocity(planet);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
 		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
 	}
-
-	Planet* planet;
-	planet = mainScene.planets_.allocate();
-	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
-	planet->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, 0.0f, true, false);
-	planet->GetRigidBody()->angularMomentum_ = 0.001f;
-	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
 	GLuint key;
 	/*glGenVertexArrays(1, &postprocessVAO);
@@ -333,6 +346,13 @@ int main() {
 				explosion->Destroy();
 				mainScene.explosions_.deallocate(explosion);
 			}
+		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
+			if(ship->isValid_ && !ship->isWorking_) {
+				ship->Destroy();
+				mainScene.ships_.deallocate(ship);
+			}
+		interface.CleanUp();
+
 		SDL_GL_SwapWindow(Engine::window_);
 	}
 	return 0;
