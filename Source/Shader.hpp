@@ -13,6 +13,7 @@ enum class Shaders {
 	BODY,
 	EXPLOSION,
 	HEALTH_BAR,
+	SHELL,
 	COUNT
 };
 

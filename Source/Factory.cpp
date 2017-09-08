@@ -34,14 +34,14 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 		ship->Initialize(isPlayer, mesh, transform, rigidBody);
 
 		auto weapon = ship->GetWeapon();
-		weapon->initialize(0.001f, 20.0f, 0.97f);
+		weapon->initialize(0.005f, 20.0f, 0.992f);
 
 		auto hull = ship->GetHull();
 		hull->Initialize(1.0f);
 	}
 
 	auto healthBar = interface_->healthBars_.allocate();
-	healthBar->Initialize(ship, &Engine::meshes_[Meshes::GENERIC_QUAD]);
+	healthBar->Initialize(ship, &Engine::meshes_[Meshes::QUAD]);
 
 	return ship;
 }

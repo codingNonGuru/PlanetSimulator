@@ -24,7 +24,7 @@ public:
 	container::DynamicPool<Asteroid> asteroids_;
 	container::DynamicPool<Planet> planets_;
 	container::DynamicPool<Controller> controllers_;
-	container::DynamicPool<Projectile> projectiles_;
+	container::DynamicPool<Shell> shells_;
 	container::DynamicPool<Weapon> weaponSystems_;
 	container::DynamicPool<Collider> colliders_;
 	container::DynamicPool<Explosion> explosions_;

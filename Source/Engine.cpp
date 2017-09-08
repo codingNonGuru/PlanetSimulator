@@ -69,7 +69,7 @@ void Engine::initialize(GLuint sampleCount) {
 	sprites_[0] = Sprite(glm::vec2(0.0f, 0.0f), &texture, GL_R8, GL_RED, GL_UNSIGNED_BYTE);
 	sprites_[0].scale_ = glm::vec2(image->w, image->h);
 
-	image = IMG_Load("Textures/projectile.png");
+	image = IMG_Load("Textures/shell.png");
 	texture.initialize(image->w, image->h);
 	spr = (ByteSizePixel*)image->pixels;
 	for(auto tex = texture.getStart(); tex != texture.getEnd(); ++tex)

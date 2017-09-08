@@ -14,30 +14,32 @@ typedef unsigned int GLuint;
 
 enum class Meshes
 {
-	GENERIC_QUAD,
+	QUAD,
 	SPACESHIP_SCOUT,
 	SPACESHIP_CORVETTE,
-	PROJECTILE,
+	SHELL,
 	COUNT
 };
 
-class VertexSet {
+class Vertex
+{
 public:
-	glm::vec2* vertices_;
-	GLuint* indices_;
-	GLuint* boneKeys_;
+	glm::vec2 position_;
+	glm::vec2 coordinates_;
+	float weight_;
 };
 
 class Mesh {
 public:
 	GLuint vertexArrayObjectIndex_;
-	VertexSet vertexSet_;
+	Vertex* vertices_;
+	GLuint* indices_;
 	GLuint elementCount_;
 
 	Mesh();
 	void initialize(Meshes);
 	void draw(glm::mat4&, glm::mat4&);
-	glm::vec2* GetVertex(int);
+	glm::vec2* GetPosition(int);
 	virtual ~Mesh();
 };
 

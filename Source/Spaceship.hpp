@@ -15,7 +15,7 @@
 typedef float Temperature;
 typedef float Power;
 
-class Projectile;
+class Shell;
 class HealthBar;
 
 class Weapon {
@@ -61,7 +61,7 @@ public:
 	float currentIntegrity_;
 
 	void Initialize(float integrity) {maximumIntegrity_ = integrity; currentIntegrity_ = integrity;}
-	void Damage(Projectile*);
+	void Damage(Shell*);
 	float GetDamage() const {return currentIntegrity_ / maximumIntegrity_;}
 };
 
@@ -93,7 +93,7 @@ public:
 	void Collide(Collision*) override;
 };
 
-class Projectile : public GameObject {
+class Shell : public GameObject {
 public:
 	float lifeTime_;
 

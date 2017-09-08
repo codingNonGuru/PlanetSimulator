@@ -24,7 +24,7 @@ void Scene::initialize() {
 	planets_.initialize(32);
 	asteroids_.initialize(256);
 	controllers_.initialize(128);
-	projectiles_.initialize(1024);
+	shells_.initialize(1024);
 	weaponSystems_.initialize(512);
 	colliders_.initialize(2048);
 	explosions_.initialize(256);
@@ -34,7 +34,7 @@ void Scene::initialize() {
 		ship->isWorking_ = false;
 	}
 
-	for(auto projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile) {
+	for(auto projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile) {
 		projectile->isValid_ = false;
 		projectile->isWorking_ = false;
 	}
@@ -55,7 +55,7 @@ void Scene::initialize() {
 
 void Scene::UpdateCollisions()
 {
-	for(Projectile* projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile)
+	for(Shell* projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile)
 		if(projectile->isValid_ && projectile->isWorking_)
 			projectile->UpdateCollisions();
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
@@ -66,7 +66,7 @@ void Scene::UpdateCollisions()
 void Scene::UpdatePhysics()
 {
 	//std::cout<<ownShip_->weapon_->GetHeatFactor()<<"\n";
-	std::cout<<projectiles_.getSize()<<"\n";
+	std::cout<<shells_.getSize()<<"\n";
 
 	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)
@@ -75,7 +75,7 @@ void Scene::UpdatePhysics()
 	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
 		if(ship->isValid_ && ship->isWorking_)
 			ship->updatePhysics();
-	for(Projectile* projectile = projectiles_.getStart(); projectile != projectiles_.getEnd(); ++projectile)
+	for(Shell* projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile)
 		if(projectile->isValid_ && projectile->isWorking_)
 			projectile->updatePhysics();
 	for(Planet* planet = planets_.getStart(); planet != planets_.getEnd(); ++planet)

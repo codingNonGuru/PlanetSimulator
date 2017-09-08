@@ -17,7 +17,7 @@ void Collider::Update()
 	if(!scene)
 		return;
 
-	for(Projectile* projectile = scene->projectiles_.getStart(); projectile != scene->projectiles_.getEnd(); ++projectile)
+	for(Shell* projectile = scene->shells_.getStart(); projectile != scene->shells_.getEnd(); ++projectile)
 	{
 		if(projectile->isValid_ && projectile->isWorking_ && projectile != parent_)
 			Resolve(projectile);
@@ -100,7 +100,7 @@ void Collider::Resolve(GameObject* otherObject)
 		{
 			for(int j = i; j < i + 3; ++j)
 			{
-				auto vertex = mesh->GetVertex(j);
+				auto vertex = mesh->GetPosition(j);
 				float x = vertex->x * cosine - vertex->y * sine;
 				float y = vertex->x * sine + vertex->y * cosine;
 				x *= meshTransform->scale_;

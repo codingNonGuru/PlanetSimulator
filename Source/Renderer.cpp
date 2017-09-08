@@ -22,7 +22,7 @@ container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.07f;
+float Renderer::zoomFactor_ = 0.05f;
 Texture* Renderer::perlinTexture_ = nullptr;
 
 void Renderer::Initialize(Scene* scene)
@@ -43,6 +43,7 @@ void Renderer::Initialize(Scene* scene)
 	shaderMap_->initialize(Shaders::MESH, "Shaders/Mesh.vert", "Shaders/Mesh.frag", nullptr);
 	shaderMap_->initialize(Shaders::EXPLOSION, "Shaders/Explosion.vert", "Shaders/Explosion.frag", nullptr);
 	shaderMap_->initialize(Shaders::HEALTH_BAR, "Shaders/HealthBar.vert", "Shaders/HealthBar.frag", nullptr);
+	shaderMap_->initialize(Shaders::SHELL, "Shaders/Shell.vert", "Shaders/Shell.frag", nullptr);
 
 	GLuint key;
 	glGenVertexArrays(1, &key);

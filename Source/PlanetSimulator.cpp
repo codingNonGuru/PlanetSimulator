@@ -107,19 +107,31 @@ void draw() {
 		}
 	Renderer::GetMap()->unuse(Shaders::MESH);
 
-	Renderer::GetMap()->use(Shaders::SPRITE);
-	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
-	glUniform2f(2, Engine::sprites_[1].scale_.x * 0.5f, Engine::sprites_[1].scale_.y * 0.5f);
-	glUniform1i(3, 0);
-	for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
-		if(projectile->isValid_ && projectile->isWorking_) {
-			float speed = glm::length(projectile->GetRigidBody()->velocity_) * 2.5f;
+	Renderer::GetMap()->use(Shaders::SHELL);
+	for(Shell* shell = mainScene.shells_.getStart(); shell != mainScene.shells_.getEnd(); ++shell)
+		if(shell->isValid_) {
+			glUniform1f(2, shell->GetTransform()->scale_ * 2.0f);
+			float speed = glm::length(shell->GetRigidBody()->velocity_);
+			speed *= speed * 4.0f;
 			if(speed > 1.0f)
 				speed = 1.0f;
-			glUniform1f(4, 3.0f * speed * speed - 2.0f * speed * speed * speed);
-			projectile->Draw(finalMatrix);
+			glUniform1f(4, speed);
+			shell->Draw(finalMatrix);
 		}
-	Renderer::GetMap()->unuse(Shaders::SPRITE);
+	Renderer::GetMap()->unuse(Shaders::SHELL);
+
+	/*Renderer::GetMap()->use(Shaders::SPRITE);
+	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
+	glUniform2f(2, Engine::sprites_[1].scale_.x * 0.25f, Engine::sprites_[1].scale_.y * 0.5f);
+	glUniform1i(3, 0);
+	for(Shell* shell = mainScene.shells_.getStart(); shell != mainScene.shells_.getEnd(); ++shell)
+		if(shell->isValid_) {
+			float speed = glm::length(shell->GetRigidBody()->velocity_);
+			speed *= speed * 10.0f;
+			glUniform1f(4, speed);
+			shell->Draw(finalMatrix);
+		}
+	Renderer::GetMap()->unuse(Shaders::SPRITE);*/
 
 	Renderer::GetMap()->use(Shaders::EXPLOSION);
 	for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
@@ -203,10 +215,10 @@ void initializeGraphics() {
 		true
 		);
 
-	Engine::meshes_.initialize(Meshes::GENERIC_QUAD);
+	Engine::meshes_.initialize(Meshes::QUAD);
 	Engine::meshes_.initialize(Meshes::SPACESHIP_SCOUT);
 	Engine::meshes_.initialize(Meshes::SPACESHIP_CORVETTE);
-	Engine::meshes_.initialize(Meshes::PROJECTILE);
+	Engine::meshes_.initialize(Meshes::SHELL);
 
 	Transform* transform = nullptr;
 	RigidBody* rigidBody = nullptr;
@@ -220,14 +232,14 @@ void initializeGraphics() {
 	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
 	mainScene.ownShip_ = ship;
 
-	for(int i = 0; i < 3; ++i)
+	/*for(int i = 0; i < 3; ++i)
 	{
-		for(int j = 0; j < 2; ++j)
+		for(int j = 0; j < 3; ++j)
 		{
 			transform = new Transform(Position(100.0f + (float)i * 5.0f, 5.0f + (float)j * 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
 			ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
 		}
-	}
+	}*/
 
 	//transform = new Transform(Position(100.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
 	//ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
@@ -236,7 +248,7 @@ void initializeGraphics() {
 	planet = mainScene.planets_.allocate();
 	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
 	rigidBody = new RigidBody(planet, 1.0f, 1.0f);
-	planet->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody);
 	planet->GetRigidBody()->angularMomentum_ = 0.001f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
@@ -249,7 +261,7 @@ void initializeGraphics() {
 		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
 		transform = new Transform(position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
 		rigidBody = new RigidBody(asteroid, 1.0f, 1.0f);
-		asteroid->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody);
 		rigidBody->AddOrbitalVelocity(planet);
 		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
@@ -326,7 +338,7 @@ int main() {
 				explosion->updateLogic();
 			}
 		}
-		for(auto projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
+		for(auto projectile = mainScene.shells_.getStart(); projectile != mainScene.shells_.getEnd(); ++projectile)
 			if(projectile->isValid_ && projectile->isWorking_) {
 				projectile->updateLogic();
 			}
@@ -336,10 +348,10 @@ int main() {
 
 		draw();
 
-		for(Projectile* projectile = mainScene.projectiles_.getStart(); projectile != mainScene.projectiles_.getEnd(); ++projectile)
+		for(Shell* projectile = mainScene.shells_.getStart(); projectile != mainScene.shells_.getEnd(); ++projectile)
 			if(projectile->isValid_ && !projectile->isWorking_) {
 				projectile->Destroy();
-				mainScene.projectiles_.deallocate(projectile);
+				mainScene.shells_.deallocate(projectile);
 			}
 		for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
 			if(explosion->isValid_ && !explosion->isWorking_) {

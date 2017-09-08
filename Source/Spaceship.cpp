@@ -37,17 +37,17 @@ void Spaceship::updateLogic() {
 	if(controller_->IsActing(Actions::SHOOT) && weapon_->CanFire()) {
 		weapon_->Fire();
 		{
-			auto projectile = mainScene_->projectiles_.allocate();
+			auto projectile = mainScene_->shells_.allocate();
 
 			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.15f, 0.15f, 0.0f, 0.05f);
 			Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-			float speed = utility::getRandom(0.58f, 0.6f);
+			float speed = utility::getRandom(0.48f, 0.5f);
 
 			Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
 			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
 			Transform* transform = new Transform(position, rotation, 1.0f);
 			RigidBody* rigidBody = new RigidBody(projectile, 1.0f, 0.995f);
-			projectile->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, rigidBody);
+			projectile->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, rigidBody);
 			rigidBody->PushForward(speed);
 			projectile->SetParent(this);
 		}
@@ -136,7 +136,7 @@ void Spaceship::Collide(Collision* collision)
 	}
 }
 
-void Projectile::updateLogic() {
+void Shell::updateLogic() {
 	lifeTime_ += 0.01f;
 	if(lifeTime_ > 3.0f)
 	{
@@ -144,7 +144,7 @@ void Projectile::updateLogic() {
 	}
 }
 
-void Projectile::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
+void Shell::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
 {
 	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
 	strcpy(name_, "projectile");
@@ -153,7 +153,7 @@ void Projectile::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, Rig
 	lifeTime_ = 0.0f;
 }
 
-void Projectile::Collide(Collision* collision)
+void Shell::Collide(Collision* collision)
 {
 	bool isCollisionValid = collision->collider_ != parent_;
 	if(isCollisionValid)
@@ -163,7 +163,7 @@ void Projectile::Collide(Collision* collision)
 		Transform* transform = new Transform();
 		*transform = *transform_;
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
-		explosion->Initialize(false, &Engine::meshes_[Meshes::GENERIC_QUAD], transform, nullptr);
+		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr);
 	}
 }
 
@@ -203,7 +203,7 @@ void Weapon::Cool()
 	isCooling_ = true;
 }
 
-void Hull::Damage(Projectile* projectile)
+void Hull::Damage(Shell* projectile)
 {
 	currentIntegrity_ -= 0.01f;
 }
