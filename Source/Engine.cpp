@@ -23,7 +23,7 @@ bool Engine::isRunning_ = true;
 void Engine::initialize(GLuint sampleCount) {
 	isRunning_ = true;
 	screen_ = new Screen();
-	screen_->setAttributes(1920, 1080);
+	screen_->setAttributes(2560, 1440);
 	sampleCount_ = sampleCount;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -40,7 +40,7 @@ void Engine::initialize(GLuint sampleCount) {
 
 	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
 	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, sampleCount_ );
-	window_ = SDL_CreateWindow("PlanetSimulator", 0, 0, screen_->getWidthInteger(), screen_->getHeightInteger(), SDL_WINDOW_OPENGL);
+	window_ = SDL_CreateWindow("PlanetSimulator", 0, 0, screen_->getWidthInteger(), screen_->getHeightInteger(), SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
 	SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 	SDL_GLContext context = SDL_GL_CreateContext(window_);
 	SDL_GL_SetSwapInterval(1);

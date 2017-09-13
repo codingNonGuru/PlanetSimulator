@@ -110,7 +110,7 @@ void draw() {
 	Renderer::GetMap()->use(Shaders::SHELL);
 	for(Shell* shell = mainScene.shells_.getStart(); shell != mainScene.shells_.getEnd(); ++shell)
 		if(shell->isValid_) {
-			glUniform1f(2, shell->GetTransform()->scale_ * 2.0f);
+			glUniform1f(2, shell->GetTransform()->scale_ * 1.5f);
 			float speed = glm::length(shell->GetRigidBody()->velocity_);
 			speed *= speed * 4.0f;
 			if(speed > 1.0f)
@@ -216,8 +216,9 @@ void initializeGraphics() {
 		);
 
 	Engine::meshes_.initialize(Meshes::QUAD);
-	Engine::meshes_.initialize(Meshes::SPACESHIP_SCOUT);
-	Engine::meshes_.initialize(Meshes::SPACESHIP_CORVETTE);
+	Engine::meshes_.initialize(Meshes::SHIP_SCOUT);
+	Engine::meshes_.initialize(Meshes::SHIP_CORVETTE);
+	Engine::meshes_.initialize(Meshes::SHIP_BARGE);
 	Engine::meshes_.initialize(Meshes::SHELL);
 
 	Transform* transform = nullptr;
@@ -232,14 +233,14 @@ void initializeGraphics() {
 	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
 	mainScene.ownShip_ = ship;
 
-	/*for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < 1; ++i)
 	{
-		for(int j = 0; j < 3; ++j)
+		for(int j = 0; j < 1; ++j)
 		{
 			transform = new Transform(Position(100.0f + (float)i * 5.0f, 5.0f + (float)j * 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
-			ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
+			ship = ShipFactory::Produce(false, ShipTypes::BARGE, transform);
 		}
-	}*/
+	}
 
 	//transform = new Transform(Position(100.0f, 5.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 1.2f);
 	//ship = ShipFactory::Produce(false, ShipTypes::SCOUT, transform);
@@ -248,22 +249,22 @@ void initializeGraphics() {
 	planet = mainScene.planets_.allocate();
 	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
 	rigidBody = new RigidBody(planet, 1.0f, 1.0f);
-	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody);
+	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 	planet->GetRigidBody()->angularMomentum_ = 0.001f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
 	Asteroid* asteroid;
-	for(int i = 0; i < 80; ++i)
+	for(int i = 0; i < 30; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
 		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
 		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
 		transform = new Transform(position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), 20.0f);
-		rigidBody = new RigidBody(asteroid, 1.0f, 1.0f);
-		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody);
+		rigidBody = new RigidBody(asteroid, 100.0f, 1.0f);
+		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 		rigidBody->AddOrbitalVelocity(planet);
-		asteroid->GetRigidBody()->angularMomentum_ = 0.01f;
+		asteroid->GetRigidBody()->Spin(0.05f);
 		asteroid->GetRigidBody()->angularDrag_ = 1.0f;
 		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
 	}

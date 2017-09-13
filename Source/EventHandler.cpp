@@ -79,6 +79,8 @@ void EventHandler::receiveInput() {
 		*currentKeys_.allocate() = SDLK_3;
 	if(keyStates[SDL_SCANCODE_4]) //Open menu
 		*currentKeys_.allocate() = SDLK_4;
+	if(keyStates[SDL_SCANCODE_ESCAPE])
+		Engine::ShutDown();
 	SDL_PumpEvents();
 }
 

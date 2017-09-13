@@ -1,8 +1,8 @@
 #include "Explosion.hpp"
 
-void Explosion::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
+void Explosion::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller = nullptr)
 {
-	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody, controller);
 	lifeTime_ = 0.0f;
 }
 

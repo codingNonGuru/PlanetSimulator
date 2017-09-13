@@ -15,6 +15,8 @@
 #include "Transform.hpp"
 #include "Planet.hpp"
 
+float RigidBody::gravityConstant_ = 0.002f;
+
 RigidBody::RigidBody() {
 }
 
@@ -29,12 +31,14 @@ void RigidBody::Initialize(GameObject* parent, float mass, float drag)
 	angularMomentum_ = 0.0f;
 	drag_ = drag;
 	angularDrag_ = 0.95f;
-	mass_ = 1.0f;
+	mass_ = mass;
 }
 
 void RigidBody::update(Transform* transform) {
 	transform->position_ += velocity_;
 	transform->rotation_.z += angularMomentum_;
+	if(transform->rotation_.z > 6.2831f)
+		transform->rotation_.z -= 6.2831f;
 	velocity_ *= drag_;
 	angularMomentum_ *= angularDrag_;
 }
@@ -47,23 +51,24 @@ void RigidBody::updateGravity(GameObject* parent) {
 			glm::vec3 direction = planet->transform_->position_ - parent->transform_->position_;
 			float distance = glm::length(direction);
 			//velocity_ += (direction * mass_ * planet->GetRigidBody()->mass_) / (distance * distance * distance);
-			velocity_ += (direction * mass_ * 0.5f) / (distance * distance * distance);
+			velocity_ += (direction * mass_ * gravityConstant_) / (distance * distance * distance);
 		}
 	}
 }
 
-void RigidBody::Spin(float impulse) {
-	angularMomentum_ += impulse;
+void RigidBody::Spin(float impulse)
+{
+	angularMomentum_ += impulse / mass_;
 }
 
 void RigidBody::Push(Direction impulse)
 {
-	velocity_ += impulse;
+	velocity_ += impulse / mass_;
 }
 
 void RigidBody::PushForward(float impulse)
 {
-	velocity_ += parent_->GetTransform()->GetForward() * impulse;
+	velocity_ += parent_->GetTransform()->GetForward() * impulse / mass_;
 }
 
 void RigidBody::AddOrbitalVelocity(GameObject* attractor)
@@ -74,7 +79,7 @@ void RigidBody::AddOrbitalVelocity(GameObject* attractor)
 	Direction direction = parent_->transform_->position_ - attractor->GetTransform()->position_;
 	float distance = glm::length(direction);
 	Direction orbitalVelocity = direction / distance;
-	velocity_ += glm::vec3(orbitalVelocity.y, -orbitalVelocity.x, 0.0f) * sqrt(0.5f / distance);
+	velocity_ += glm::vec3(orbitalVelocity.y, -orbitalVelocity.x, 0.0f) * sqrt(gravityConstant_ * mass_ / distance);
 }
 
 RigidBody::~RigidBody() {

@@ -34,12 +34,17 @@ void traceLine(int lineIndex, glm::vec2 start, glm::vec2 end, float thickness, G
 
 void Mesh::initialize(Meshes mesh) {
 	int vertexCount, indexCount;
-	if(mesh == Meshes::SPACESHIP_SCOUT)
+	if(mesh == Meshes::SHIP_SCOUT)
 	{
 		vertexCount = 3;
 		indexCount = 3;
 	}
-	else if(mesh == Meshes::SPACESHIP_CORVETTE)
+	else if(mesh == Meshes::SHIP_CORVETTE)
+	{
+		vertexCount = 4;
+		indexCount = 6;
+	}
+	else if(mesh == Meshes::SHIP_BARGE)
 	{
 		vertexCount = 4;
 		indexCount = 6;
@@ -59,7 +64,7 @@ void Mesh::initialize(Meshes mesh) {
 	vertices_ = (Vertex*)malloc(sizeof(Vertex) * vertexCount);
 	indices_ = (GLuint*)malloc(sizeof(GLuint) * indexCount);
 
-	if(mesh == Meshes::SPACESHIP_SCOUT) {
+	if(mesh == Meshes::SHIP_SCOUT) {
 		vertices_[0].position_ = glm::vec2(0.5f, 0.0f);
 		vertices_[1].position_ = glm::vec2(-0.25f, 0.3f);
 		vertices_[2].position_ = glm::vec2(-0.25f, -0.3f);
@@ -72,7 +77,7 @@ void Mesh::initialize(Meshes mesh) {
 			vertex->weight_ = 1.0f;
 		}
 	}
-	else if(mesh == Meshes::SPACESHIP_CORVETTE) {
+	else if(mesh == Meshes::SHIP_CORVETTE) {
 		vertices_[0].position_ = glm::vec2(0.9f, 0.0f);
 		vertices_[1].position_ = glm::vec2(-0.3f, 0.45f);
 		vertices_[2].position_ = glm::vec2(-0.3f, -0.45f);
@@ -81,6 +86,23 @@ void Mesh::initialize(Meshes mesh) {
 		indices_[1] = 1;
 		indices_[2] = 2;
 		indices_[3] = 1;
+		indices_[4] = 2;
+		indices_[5] = 3;
+
+		for(auto vertex = vertices_; vertex != vertices_ + vertexCount; ++vertex)
+		{
+			vertex->weight_ = 1.0f;
+		}
+	}
+	else if(mesh == Meshes::SHIP_BARGE) {
+		vertices_[0].position_ = glm::vec2(2.0f, 0.65f);
+		vertices_[3].position_ = glm::vec2(2.0f, -0.65f);
+		vertices_[2].position_ = glm::vec2(-2.0f, -0.8f);
+		vertices_[1].position_ = glm::vec2(-2.0f, 0.8f);
+		indices_[0] = 0;
+		indices_[1] = 1;
+		indices_[2] = 2;
+		indices_[3] = 0;
 		indices_[4] = 2;
 		indices_[5] = 3;
 

@@ -15,8 +15,9 @@ typedef unsigned int GLuint;
 enum class Meshes
 {
 	QUAD,
-	SPACESHIP_SCOUT,
-	SPACESHIP_CORVETTE,
+	SHIP_SCOUT,
+	SHIP_CORVETTE,
+	SHIP_BARGE,
 	SHELL,
 	COUNT
 };

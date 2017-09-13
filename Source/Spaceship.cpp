@@ -37,58 +37,42 @@ void Spaceship::updateLogic() {
 	if(controller_->IsActing(Actions::SHOOT) && weapon_->CanFire()) {
 		weapon_->Fire();
 		{
-			auto projectile = mainScene_->shells_.allocate();
+			auto shell = mainScene_->shells_.allocate();
 
 			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.15f, 0.15f, 0.0f, 0.05f);
 			Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-			float speed = utility::getRandom(0.48f, 0.5f);
+			float speed = utility::getRandom(0.58f, 0.6f);
 
 			Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
 			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
 			Transform* transform = new Transform(position, rotation, 1.0f);
-			RigidBody* rigidBody = new RigidBody(projectile, 1.0f, 0.995f);
-			projectile->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, rigidBody);
+			RigidBody* rigidBody = new RigidBody(shell, 1.0f, 0.995f);
+
+			shell->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, rigidBody, nullptr);
 			rigidBody->PushForward(speed);
-			projectile->SetParent(this);
+			shell->SetParent(this);
+
+			shell->isAttached_ = false;
 		}
 	}
 	if(controller_->IsActing(Actions::STEER_LEFT)) {
 		if(rigidBody_)
-			rigidBody_->Spin(-0.001f);
+			rigidBody_->Spin(-thruster_.power_ * 0.5f);
 	}
 	if(controller_->IsActing(Actions::STEER_RIGHT)) {
 		if(rigidBody_)
-			rigidBody_->Spin(0.001f);
+			rigidBody_->Spin(thruster_.power_ * 0.5f);
 	}
 	if(controller_->IsActing(Actions::THRUST)) {
 		if(rigidBody_)
-			rigidBody_->PushForward(0.0015f);
+			rigidBody_->PushForward(thruster_.power_);
 	}
 	if(controller_->IsActing(Actions::RETURN)) {
 		if(rigidBody_)
-			rigidBody_->PushForward(-0.0015f);
+			rigidBody_->PushForward(-thruster_.power_);
 	}
 	if(controller_->IsActing(Actions::COOL)) {
 		weapon_->Cool();
-	}
-
-	if(controller_->isHuman()) {
-		float leastDistance = 9999.9f;
-		Asteroid* closestAsteroid = nullptr;
-		for(auto asteroid = GameObject::mainScene_->asteroids_.getStart(); asteroid != GameObject::mainScene_->asteroids_.getEnd(); ++asteroid)
-		{
-			if(asteroid->isValid_)
-			{
-				auto direction = transform_->position_ - asteroid->transform_->position_;
-				float distance = glm::length(direction);
-				if(distance < leastDistance && distance < sensor_.GetLimit())
-				{
-					closestAsteroid = asteroid;
-					leastDistance = distance;
-				}
-			}
-		}
-		sensor_.SetObject(closestAsteroid);
 	}
 
 	if(controller_->IsActing(Actions::MINE)) {
@@ -98,16 +82,37 @@ void Spaceship::updateLogic() {
 			cargo_.AddOre(0.002f);
 		}
 	}
+}
 
-	//std::cout<<cargo_.GetOre()<<"\n";
+GameObject* Sensor::GetClosestAsteroid()
+{
+	float leastDistance = 9999.9f;
+	Asteroid* closestAsteroid = nullptr;
+	for(auto asteroid = GameObject::mainScene_->asteroids_.getStart(); asteroid != GameObject::mainScene_->asteroids_.getEnd(); ++asteroid)
+	{
+		if(asteroid->isValid_)
+		{
+			auto direction = parent_->transform_->position_ - asteroid->transform_->position_;
+			float distance = glm::length(direction);
+			if(distance < leastDistance && distance < GetLimit() * 10.0f)
+			{
+				closestAsteroid = asteroid;
+				leastDistance = distance;
+			}
+		}
+	}
+
+	SetObject(closestAsteroid);
+
+	return closestAsteroid;
 }
 
 Spaceship::~Spaceship() {
 	// TODO Auto-generated destructor stub
 }
 
-void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody) {
-	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
+void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller) {
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody, controller);
 	strcpy(name_, "spaceship");
 
 	collider_ = mainScene_->colliders_.allocate();
@@ -115,15 +120,33 @@ void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, Rigi
 
 	weapon_ = mainScene_->weaponSystems_.allocate();
 
-	sensor_ = Sensor();
-	cargo_ = Cargo();
+	sensor_ = Sensor(this);
+
+	cargo_.Initialize(1.0f);
+
+	if(!controller)
+	{
+		if(IsControlled())
+		{
+			if(isPlayer)
+				controller_ = mainScene_->controllers_.allocate<HumanController>();
+			else
+				controller_ = mainScene_->controllers_.allocate<MachineController>();
+		}
+		else
+			controller_ = nullptr;
+	}
+	else
+	{
+		controller_ = controller;
+	}
+
+	if(controller_)
+		controller_->Initialize(this);
 }
 
 void Spaceship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
 {
-	if(!healthBar_)
-		return;
-
 	//healthBar_->GetMesh()->draw(finalMatrix, worldMatrix);
 }
 
@@ -144,10 +167,10 @@ void Shell::updateLogic() {
 	}
 }
 
-void Shell::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody)
+void Shell::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller)
 {
-	GameObject::Initialize(isPlayer, mesh, transform, rigidBody);
-	strcpy(name_, "projectile");
+	GameObject::Initialize(isPlayer, mesh, transform, rigidBody, controller);
+	strcpy(name_, "shell");
 	collider_ = mainScene_->colliders_.allocate();
 	collider_->Initialize(this, BoundingBoxes::POINT);
 	lifeTime_ = 0.0f;
@@ -163,7 +186,7 @@ void Shell::Collide(Collision* collision)
 		Transform* transform = new Transform();
 		*transform = *transform_;
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
-		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr);
+		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr, nullptr);
 	}
 }
 
@@ -203,7 +226,19 @@ void Weapon::Cool()
 	isCooling_ = true;
 }
 
-void Hull::Damage(Shell* projectile)
+void Hull::Damage(Shell* shell)
 {
 	currentIntegrity_ -= 0.01f;
+}
+
+void Cargo::Initialize(float capacity)
+{
+	capacity_ = capacity;
+	mineralOre_ = 0.0f;
+}
+
+void Thruster::Initialize(float power, float fuel)
+{
+	power_ = power;
+	fuel_ = fuel;
 }

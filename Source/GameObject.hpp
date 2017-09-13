@@ -19,6 +19,7 @@ class Weapon;
 class Collider;
 class Collision;
 typedef glm::mat4 Matrix;
+typedef glm::vec3 Position;
 
 class GameObject {
 public:
@@ -31,9 +32,9 @@ public:
 	RigidBody* rigidBody_;
 	Controller* controller_;
 	Collider* collider_;
-	bool isValid_, isWorking_;
+	bool isValid_, isWorking_, isAttached_;
 
-	virtual void Initialize(bool, Mesh*, Transform*, RigidBody*);
+	virtual void Initialize(bool, Mesh*, Transform*, RigidBody*, Controller*);
 	virtual void Draw(Matrix&);
 	virtual void OnDraw(Matrix&, Matrix&) {}
 	virtual void updatePhysics();
@@ -50,6 +51,7 @@ public:
 	void SetParent(GameObject* parent) {parent_ = parent;}
 	virtual void Collide(Collision*) {}
 	void Destroy();
+	Position GetWorldPosition();
 };
 
 #endif /* GAMEOBJECT_HPP_ */

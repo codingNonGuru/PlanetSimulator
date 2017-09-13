@@ -16,6 +16,8 @@ typedef glm::vec3 Direction;
 
 class RigidBody {
 public:
+	static float gravityConstant_;
+
 	GameObject* parent_;
 	glm::vec3 velocity_;
 	float angularMomentum_;

@@ -9,8 +9,8 @@ layout (location = 2) uniform float scale;
 out vec2 pos;
 
 void main() {
-	pos = vertexPosition;
+	pos = vertexPosition * scale;
 	
-	vec4 position = modelMatrix * vec4(vertexPosition.xy * scale, 0.1f, 1.0f);
+	vec4 position = modelMatrix * vec4(vertexPosition * scale, 0.1f, 1.0f);
 	gl_Position = viewMatrix * position;
 }
