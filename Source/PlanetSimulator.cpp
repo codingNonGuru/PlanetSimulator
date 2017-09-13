@@ -26,12 +26,12 @@
 #include "Interface.hpp"
 #include "HealthBar.hpp"
 #include "Factory.hpp"
+#include "Structure.hpp"
 
 float elapsedTime = 0.0f;
 Planet* planets = NULL;
 int planetCount = 3;
 GLuint planetVertexBuffer, planetCoordBuffer, planetVAO, postprocessVAO, particleVAO;
-FramebufferAtlas framebuffers;
 GLuint posSSBO, velSSBO, particleCount = 1024;
 int frames = 0;
 Scene mainScene;
@@ -43,14 +43,7 @@ void bindTexture(Shaders shader, const char* name, unsigned int index, unsigned 
 	glBindTexture(GL_TEXTURE_2D, textureKey);
 }
 
-void draw() {
-	float zoomFactor = Renderer::GetZoomFactor();
-	Spaceship* ownShip = mainScene.ownShip_;
-	glm::vec3 screenCenter(ownShip->transform_->position_.x + -Engine::screen_->getWidthFloating() * 0.5f * zoomFactor, ownShip->transform_->position_.y + -Engine::screen_->getHeightFloating() * 0.5f * zoomFactor, 0.0f);
-	glm::mat4 projectionMatrix = glm::ortho<float> (0.0f, Engine::screen_->getWidthFloating() * zoomFactor, Engine::screen_->getHeightFloating() * zoomFactor, 0.0f, 0.1f, 10.0f);
-	glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 1.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 finalMatrix = projectionMatrix * viewMatrix;
-
+void Draw() {
 	/*materialAtlas.use(Shaders::PARTICLES_COMPUTE);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posSSBO);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posSSBO);
@@ -61,32 +54,9 @@ void draw() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	materialAtlas.unuse(Shaders::PARTICLES_COMPUTE);*/
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LEQUAL);
-	glDepthRange(0.0f, 1.0f);
-	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_SAMPLE_SHADING);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	Renderer::DrawScene(&mainScene);
 
-	framebuffers[Framebuffers::DEFAULT].bindBuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
-	//framebuffers[Framebuffers::DEFAULT].bindBuffer(GL_READ_BUFFER, GL_BACK);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
-	glClearDepth(1.0f);
-
-	Renderer::Draw(&mainScene);
-
-	Renderer::GetMap()->use(Shaders::SPRITE);
-	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[2].textureKey_);
-	glUniform2f(2, Engine::sprites_[2].scale_.x, Engine::sprites_[2].scale_.y);
-	for(Planet* planet = mainScene.planets_.getStart(); planet != mainScene.planets_.getEnd(); ++planet)
-		if(planet->isValid_) {
-			glUniform1i(3, 0);
-			planet->Draw(finalMatrix);
-		}
-	Renderer::GetMap()->unuse(Shaders::SPRITE);
+	Renderer::DrawInterface(&interface);
 
 	/*Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[0].textureKey_);
@@ -98,27 +68,6 @@ void draw() {
 			ship->draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);*/
-
-	Renderer::GetMap()->use(Shaders::MESH);
-	for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
-		if(ship->isValid_) {
-			glUniform1f(2, ship->GetTransform()->scale_);
-			ship->Draw(finalMatrix);
-		}
-	Renderer::GetMap()->unuse(Shaders::MESH);
-
-	Renderer::GetMap()->use(Shaders::SHELL);
-	for(Shell* shell = mainScene.shells_.getStart(); shell != mainScene.shells_.getEnd(); ++shell)
-		if(shell->isValid_) {
-			glUniform1f(2, shell->GetTransform()->scale_ * 1.5f);
-			float speed = glm::length(shell->GetRigidBody()->velocity_);
-			speed *= speed * 4.0f;
-			if(speed > 1.0f)
-				speed = 1.0f;
-			glUniform1f(4, speed);
-			shell->Draw(finalMatrix);
-		}
-	Renderer::GetMap()->unuse(Shaders::SHELL);
 
 	/*Renderer::GetMap()->use(Shaders::SPRITE);
 	bindTexture(Shaders::SPRITE, "alpha", 0, Engine::sprites_[1].textureKey_);
@@ -132,26 +81,6 @@ void draw() {
 			shell->Draw(finalMatrix);
 		}
 	Renderer::GetMap()->unuse(Shaders::SPRITE);*/
-
-	Renderer::GetMap()->use(Shaders::EXPLOSION);
-	for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
-		if(explosion->isValid_ && explosion->isWorking_) {
-			glUniform1f(2, 5.0f);
-			glUniform1f(3, explosion->lifeTime_);
-			//glUniform1f(4, 1.0f);
-			explosion->Draw(finalMatrix);
-		}
-	Renderer::GetMap()->unuse(Shaders::EXPLOSION);
-
-	Renderer::GetMap()->use(Shaders::HEALTH_BAR);
-	for(HealthBar* bar = interface.healthBars_.getStart(); bar != interface.healthBars_.getEnd(); ++bar)
-		if(bar->IsValid() && bar->IsWorking()) {
-			glUniform1f(2, 5.0f);
-			glUniform1f(3, bar->GetShip()->hull_.GetDamage());
-			glUniform1f(4, bar->GetShip()->weapon_->GetHeatFactor());
-			bar->Draw(finalMatrix);
-		}
-	Renderer::GetMap()->unuse(Shaders::HEALTH_BAR);
 
 	/*materialAtlas.use(Shaders::PARTICLES_INSTANCED);
 	glBindVertexArray(particleVAO);
@@ -189,31 +118,6 @@ void draw() {
 
 void initializeGraphics() {
 	Engine::initialize(16);
-
-	framebuffers.initialize(
-		Framebuffers::INITIAL,
-		FramebufferTypes::MULTISAMPLE,
-		FramebufferTypes::TEXTURE,
-		Engine::screen_->getWidthInteger(),
-		Engine::screen_->getHeightInteger(),
-		false
-		);
-	framebuffers.initialize(
-		Framebuffers::POSTPROCESS,
-		FramebufferTypes::SINGLESAMPLE,
-		FramebufferTypes::RENDERBUFFER,
-		Engine::screen_->getWidthInteger(),
-		Engine::screen_->getHeightInteger(),
-		false
-		);
-	framebuffers.initialize(
-		Framebuffers::DEFAULT,
-		FramebufferTypes::SINGLESAMPLE,
-		FramebufferTypes::RENDERBUFFER,
-		Engine::screen_->getWidthInteger(),
-		Engine::screen_->getHeightInteger(),
-		true
-		);
 
 	Engine::meshes_.initialize(Meshes::QUAD);
 	Engine::meshes_.initialize(Meshes::SHIP_SCOUT);
@@ -269,20 +173,16 @@ void initializeGraphics() {
 		asteroid->GetTransform()->scale_ = utility::biasedRandom(1.0f, 2.5f, 1.0f, 0.5f);
 	}
 
-	GLuint key;
-	/*glGenVertexArrays(1, &postprocessVAO);
-	glBindVertexArray(postprocessVAO);
-	glGenBuffers(1, &key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 6, &Planet::vertices_[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
+	Structure* structure;
+	structure = mainScene.structures_.allocate();
+	transform = new Transform(Position(30.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 6.0f);
+	structure->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
+	structure->SetParent(planet);
 
 	Renderer::Initialize(&mainScene);
 
-	/*glGenVertexArrays(1, &particleVAO);
+	/*GLuint key;
+	glGenVertexArrays(1, &particleVAO);
 	glBindVertexArray(particleVAO);
 	glGenBuffers(1, &key);
 	glBindBuffer(GL_ARRAY_BUFFER, key);
@@ -347,7 +247,7 @@ int main() {
 		for(int i = 0; i < 1; ++i)
 			mainScene.UpdatePhysics();
 
-		draw();
+		Draw();
 
 		for(Shell* projectile = mainScene.shells_.getStart(); projectile != mainScene.shells_.getEnd(); ++projectile)
 			if(projectile->isValid_ && !projectile->isWorking_) {

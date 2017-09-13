@@ -20,6 +20,7 @@ class Collider;
 class Collision;
 typedef glm::mat4 Matrix;
 typedef glm::vec3 Position;
+typedef glm::vec3 Rotation;
 
 class GameObject {
 public:
@@ -52,6 +53,7 @@ public:
 	virtual void Collide(Collision*) {}
 	void Destroy();
 	Position GetWorldPosition();
+	Rotation GetWorldRotation();
 };
 
 #endif /* GAMEOBJECT_HPP_ */

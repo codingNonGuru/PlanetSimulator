@@ -17,6 +17,7 @@ class Planet;
 class Spaceship;
 class Collider;
 class Explosion;
+class Structure;
 
 class Scene {
 public:
@@ -28,6 +29,7 @@ public:
 	container::DynamicPool<Weapon> weaponSystems_;
 	container::DynamicPool<Collider> colliders_;
 	container::DynamicPool<Explosion> explosions_;
+	container::DynamicPool<Structure> structures_;
 
 	Spaceship* ownShip_;
 

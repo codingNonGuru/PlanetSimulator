@@ -4,9 +4,11 @@
 #include "Memory.hpp"
 
 class Scene;
+class Interface;
 class Buffer;
 class ShaderMap;
 class Texture;
+class FramebufferAtlas;
 
 class Renderer {
 	static container::Array<glm::vec3> positionBuffer_;
@@ -20,10 +22,12 @@ class Renderer {
 	static ShaderMap* shaderMap_;
 	static glm::mat4 matrix_;
 	static float zoomFactor_;
+	static FramebufferAtlas* frameBuffers_;
 
 public:
 	static void Initialize(Scene*);
-	static void Draw(Scene*);
+	static void DrawScene(Scene*);
+	static void DrawInterface(Interface*);
 	static ShaderMap*& GetMap() {return shaderMap_;}
 	static float GetZoomFactor() {return zoomFactor_;}
 	static Texture* perlinTexture_;

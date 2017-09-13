@@ -11,10 +11,21 @@
 #include "Spaceship.hpp"
 #include "Collider.hpp"
 #include "Explosion.hpp"
+#include "Structure.hpp"
 
 Scene::Scene() {
 	// TODO Auto-generated constructor stub
 
+}
+
+template<class ObjectType>
+void Disable(ObjectType* start, ObjectType* end)
+{
+	for(auto object = start; object != end; ++object)
+	{
+		object->isValid_ = false;
+		object->isWorking_ = false;
+	}
 }
 
 void Scene::initialize() {
@@ -28,29 +39,14 @@ void Scene::initialize() {
 	weaponSystems_.initialize(512);
 	colliders_.initialize(2048);
 	explosions_.initialize(256);
+	structures_.initialize(128);
 
-	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship) {
-		ship->isValid_ = false;
-		ship->isWorking_ = false;
-	}
-
-	for(auto projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile) {
-		projectile->isValid_ = false;
-		projectile->isWorking_ = false;
-	}
-
-	for(auto planet = planets_.getStart(); planet != planets_.getEnd(); ++planet) {
-		planet->isValid_ = false;
-	}
-
-	for(auto asteroid = asteroids_.getStart(); asteroid != asteroids_.getEnd(); ++asteroid) {
-		asteroid->isValid_ = false;
-	}
-
-	for(Explosion* explosion = explosions_.getStart(); explosion != explosions_.getEnd(); ++explosion)
-	{
-		explosion->isValid_ = false;
-	}
+	Disable<Spaceship>(ships_.getStart(), ships_.getEnd());
+	Disable<Shell>(shells_.getStart(), shells_.getEnd());
+	Disable<Planet>(planets_.getStart(), planets_.getEnd());
+	Disable<Asteroid>(asteroids_.getStart(), asteroids_.getEnd());
+	Disable<Explosion>(explosions_.getStart(), explosions_.getEnd());
+	Disable<Structure>(structures_.getStart(), structures_.getEnd());
 }
 
 void Scene::UpdateCollisions()
