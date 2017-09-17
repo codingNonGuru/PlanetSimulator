@@ -28,7 +28,7 @@ container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.05f;
+float Renderer::zoomFactor_ = 0.095f;
 Texture* Renderer::perlinTexture_ = nullptr;
 FramebufferAtlas* Renderer::frameBuffers_ = new FramebufferAtlas();
 
@@ -253,9 +253,9 @@ void Renderer::DrawScene(Scene* scene)
 	shaderMap_->use(Shaders::SHELL);
 	for(Shell* shell = scene->shells_.getStart(); shell != scene->shells_.getEnd(); ++shell)
 		if(shell->isValid_) {
-			glUniform1f(2, shell->GetTransform()->scale_ * 1.5f);
+			glUniform1f(2, shell->GetTransform()->scale_);
 			float speed = glm::length(shell->GetRigidBody()->velocity_);
-			speed *= speed * 4.0f;
+			speed *= speed * 10.0f;
 			if(speed > 1.0f)
 				speed = 1.0f;
 			glUniform1f(4, speed);
@@ -266,7 +266,7 @@ void Renderer::DrawScene(Scene* scene)
 	shaderMap_->use(Shaders::EXPLOSION);
 	for(Explosion* explosion = scene->explosions_.getStart(); explosion != scene->explosions_.getEnd(); ++explosion)
 		if(explosion->isValid_ && explosion->isWorking_) {
-			glUniform1f(2, 5.0f);
+			glUniform1f(2, explosion->GetTransform()->scale_);
 			glUniform1f(3, explosion->lifeTime_);
 			//glUniform1f(4, 1.0f);
 			explosion->Draw(matrix_);

@@ -81,7 +81,9 @@ public:
 	Cargo() {mineralOre_ = 0.0f;}
 	void Initialize(float);
 	void AddOre(float ore) {mineralOre_ += ore;}
+	void RemoveOre(float ore) {mineralOre_ -= ore;}
 	float GetOre() const {return mineralOre_;}
+	float GetCapacityFactor() const {return mineralOre_ / capacity_;}
 };
 
 class Spaceship : public GameObject {

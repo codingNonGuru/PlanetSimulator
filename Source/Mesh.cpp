@@ -59,6 +59,11 @@ void Mesh::initialize(Meshes mesh) {
 		vertexCount = 12;
 		indexCount = 36;
 	}
+	else if(mesh == Meshes::DOCK)
+	{
+		vertexCount = 7;
+		indexCount = 18;
+	}
 
 	elementCount_ = indexCount;
 	vertices_ = (Vertex*)malloc(sizeof(Vertex) * vertexCount);
@@ -199,6 +204,46 @@ void Mesh::initialize(Meshes mesh) {
 		indices_[33] = 8;
 		indices_[34] = 5;
 		indices_[35] = 10;
+
+		for(auto vertex = vertices_; vertex != vertices_ + vertexCount; ++vertex)
+		{
+			vertex->weight_ = 1.0f;
+		}
+	}
+	else if(mesh == Meshes::DOCK)
+	{
+		float angle = 0.0f;
+		for(int i = 0; i < 6; ++i)
+		{
+			vertices_[i].position_ = glm::vec2(cos(angle), sin(angle)) * 0.5f;
+			angle += 6.2831f / 6.0f;
+		}
+
+		vertices_[6].position_ = glm::vec2(0.0f, 0.0f);
+
+		indices_[0] = 0;
+		indices_[1] = 1;
+		indices_[2] = 6;
+
+		indices_[3] = 1;
+		indices_[4] = 2;
+		indices_[5] = 6;
+
+		indices_[6] = 2;
+		indices_[7] = 3;
+		indices_[8] = 6;
+
+		indices_[9] = 3;
+		indices_[10] = 4;
+		indices_[11] = 6;
+
+		indices_[12] = 4;
+		indices_[13] = 5;
+		indices_[14] = 6;
+
+		indices_[15] = 5;
+		indices_[16] = 0;
+		indices_[17] = 6;
 
 		for(auto vertex = vertices_; vertex != vertices_ + vertexCount; ++vertex)
 		{

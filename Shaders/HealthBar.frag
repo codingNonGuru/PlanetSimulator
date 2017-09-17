@@ -31,13 +31,13 @@ void main() {
 	if(angle < 0.0f)
 		angle += 6.2831f;
 	
-	if(dist > 1.9f && dist < 2.05f)
+	if(dist > 1.9f && dist < 1.97f)
 	{
 		alpha = 0.4f;
 		if(angle > healthFactor * 6.2831f)
 			alpha = 0.2f;
 	}
-	if(dist > 2.25f && dist < 2.35f)
+	if(dist > 2.25f && dist < 2.3f)
 	{
 		alpha = 0.4f;
 		float lowerLimit = 3.1415f - 0.6f;

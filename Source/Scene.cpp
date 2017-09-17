@@ -28,6 +28,15 @@ void Disable(ObjectType* start, ObjectType* end)
 	}
 }
 
+template<class ObjectType>
+void Execute(ObjectType* start, ObjectType* end, void(ObjectType::*function)())
+{
+	for(auto object = start; object != end; ++object)
+	{
+		(object->*function)();
+	}
+}
+
 void Scene::initialize() {
 	ownShip_ = nullptr;
 
@@ -51,12 +60,8 @@ void Scene::initialize() {
 
 void Scene::UpdateCollisions()
 {
-	for(Shell* projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile)
-		if(projectile->isValid_ && projectile->isWorking_)
-			projectile->UpdateCollisions();
-	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
-		if(ship->isValid_ && ship->isWorking_)
-			ship->UpdateCollisions();
+	Execute<Shell>(shells_.getStart(), shells_.getEnd(), &Shell::UpdateCollisions);
+	Execute<Spaceship>(ships_.getStart(), ships_.getEnd(), &Spaceship::UpdateCollisions);
 }
 
 void Scene::UpdatePhysics()

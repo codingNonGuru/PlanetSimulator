@@ -39,13 +39,13 @@ void Spaceship::updateLogic() {
 		{
 			auto shell = mainScene_->shells_.allocate();
 
-			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.15f, 0.15f, 0.0f, 0.05f);
+			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.1f, 0.1f, 0.0f, 0.03f);
 			Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
-			float speed = utility::getRandom(0.58f, 0.6f);
+			float speed = utility::getRandom(0.3f, 0.32f);
 
-			Position position = transform_->position_ + shootDirection * utility::getRandom(0.7f, 1.0f);
+			Position position = transform_->position_ + shootDirection * utility::getRandom(0.2f, 0.3f);
 			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
-			Transform* transform = new Transform(position, rotation, 1.0f);
+			Transform* transform = new Transform(position, rotation, 0.4f);
 			RigidBody* rigidBody = new RigidBody(shell, 1.0f, 0.995f);
 
 			shell->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, rigidBody, nullptr);
@@ -57,11 +57,11 @@ void Spaceship::updateLogic() {
 	}
 	if(controller_->IsActing(Actions::STEER_LEFT)) {
 		if(rigidBody_)
-			rigidBody_->Spin(-thruster_.power_ * 0.5f);
+			rigidBody_->Spin(-thruster_.power_ * 0.75f);
 	}
 	if(controller_->IsActing(Actions::STEER_RIGHT)) {
 		if(rigidBody_)
-			rigidBody_->Spin(thruster_.power_ * 0.5f);
+			rigidBody_->Spin(thruster_.power_ * 0.75f);
 	}
 	if(controller_->IsActing(Actions::THRUST)) {
 		if(rigidBody_)
@@ -80,6 +80,13 @@ void Spaceship::updateLogic() {
 		if(object != nullptr)
 		{
 			cargo_.AddOre(0.002f);
+		}
+	}
+	if(controller_->IsActing(Actions::UNLOAD))
+	{
+		if(home_)
+		{
+			cargo_.RemoveOre(0.002f);
 		}
 	}
 }
@@ -186,6 +193,7 @@ void Shell::Collide(Collision* collision)
 		Transform* transform = new Transform();
 		*transform = *transform_;
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
+		transform->scale_ = 2.0f;
 		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr, nullptr);
 	}
 }

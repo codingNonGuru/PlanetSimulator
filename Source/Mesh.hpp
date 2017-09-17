@@ -19,6 +19,7 @@ enum class Meshes
 	SHIP_CORVETTE,
 	SHIP_BARGE,
 	SHELL,
+	DOCK,
 	COUNT
 };
 

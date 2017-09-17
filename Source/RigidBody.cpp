@@ -15,7 +15,7 @@
 #include "Transform.hpp"
 #include "Planet.hpp"
 
-float RigidBody::gravityConstant_ = 0.002f;
+float RigidBody::gravityConstant_ = 0.001f;
 
 RigidBody::RigidBody() {
 }

@@ -27,6 +27,7 @@ public:
 	static Scene* mainScene_;
 
 	GameObject* parent_;
+	GameObject* home_;
 	char name_[16];
 	Mesh* mesh_;
 	Transform* transform_;
@@ -46,10 +47,12 @@ public:
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }
 	Transform*& GetTransform() { return transform_; }
+	Controller*& GetController() { return controller_; }
 	Collider* GetCollider() {return collider_;}
 	virtual Weapon* GetWeapon() {return nullptr;}
 	virtual bool IsControlled() {return false;}
 	void SetParent(GameObject* parent) {parent_ = parent;}
+	void SetHome(GameObject* home) {home_ = home;}
 	virtual void Collide(Collision*) {}
 	void Destroy();
 	Position GetWorldPosition();

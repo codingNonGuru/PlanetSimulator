@@ -17,10 +17,47 @@ void Controller::SetAction(Actions action, bool value)
 	actions_[(int)action] = value;
 }
 
+bool Controller::GetMission(Missions mission)
+{
+	return missions_[(int)mission];
+}
+
+void Controller::SetMission(Missions mission, bool value)
+{
+	missions_[(int)mission] = value;
+}
+
 void Controller::Initialize(Spaceship* parent)
 {
 	parent_ = parent;
 	target_ = nullptr;
+
+	for(int i = 0; i < (int)Missions::COUNT; ++i)
+		missions_[i] = false;
+}
+
+float distance;
+float angleFactor;
+Direction direction;
+
+void Controller::ComputeDistance()
+{
+	direction = target_->GetWorldPosition() - parent_->GetTransform()->position_;
+	distance = glm::length(direction);
+}
+
+void Controller::ReachTarget(float minimumDistance, float maximumDistance)
+{
+	direction /= distance;
+	Direction forward = parent_->GetTransform()->GetForward();
+
+	float angleFactor = glm::dot(direction, forward);
+	glm::vec3 crossProduct = glm::cross(direction, forward);
+
+	SetAction(Actions::STEER_LEFT, crossProduct.z > 0.0f);
+	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
+	SetAction(Actions::THRUST, (distance > maximumDistance && angleFactor > 0.7f) || (distance < minimumDistance && angleFactor < -0.7f));
+	SetAction(Actions::RETURN, (distance > maximumDistance && angleFactor < -0.7f) || (distance < minimumDistance && angleFactor > 0.7f));
 }
 
 void HumanController::update() {
@@ -39,7 +76,6 @@ void HumanController::update() {
 void MachineController::update() {
 	Scene* scene = GameObject::mainScene_;
 	Spaceship* otherShip = nullptr;
-	float distance;
 	for(Spaceship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
 	{
 		if(ship->isValid_ && ship->isWorking_ && ship != parent_)
@@ -49,59 +85,73 @@ void MachineController::update() {
 	for(int i = 0; i < (int)Actions::COUNT; ++i)
 		actions_[i] = false;
 
-	if(!otherShip)
+	target_ = otherShip;
+	if(target_)
 	{
-		return;
+		ComputeDistance();
+		ReachTarget(8.0f, 14.0f);
+
+		SetAction(Actions::SHOOT, distance < 20.0f && angleFactor > 0.95f);
+		SetAction(Actions::COOL, parent_->GetWeapon()->GetHeatFactor() > 0.95f);
 	}
-
-	glm::vec3 direction = otherShip->GetTransform()->position_ - parent_->GetTransform()->position_;
-	distance = glm::length(direction);
-	direction /= distance;
-	glm::vec3 forward = parent_->GetTransform()->GetForward();
-
-	float dotProduct = glm::dot(direction, forward);
-	glm::vec3 crossProduct = glm::cross(direction, forward);
-
-	SetAction(Actions::STEER_LEFT, crossProduct.z > 0.0f);
-	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
-	SetAction(Actions::THRUST, (distance > 14.0f && dotProduct > 0.7f) || (distance < 8.0f && dotProduct < -0.7f));
-	SetAction(Actions::RETURN, (distance > 14.0f && dotProduct < -0.7f) || (distance < 8.0f && dotProduct > 0.7f));
-	SetAction(Actions::SHOOT, distance < 20.0f && dotProduct > 0.95f);
-	SetAction(Actions::COOL, parent_->GetWeapon()->GetHeatFactor() > 0.95f);
 }
 
 void BargeController::update()
 {
-	if(!target_)
-	{
-		auto sensor = parent_->GetSensor();
-
-		GameObject* asteroid = nullptr;
-		if(sensor)
-			asteroid = sensor->GetClosestAsteroid();
-
-		target_ = asteroid;
-	}
-
 	for(int i = 0; i < (int)Actions::COUNT; ++i)
 		actions_[i] = false;
 
-	if(target_)
+	float capacityFactor = parent_->cargo_.GetCapacityFactor();
+
+	if(GetMission(Missions::MINE))
 	{
-		glm::vec3 direction = target_->GetTransform()->position_ - parent_->GetTransform()->position_;
-		float distance = glm::length(direction);
-		direction /= distance;
-		glm::vec3 forward = parent_->GetTransform()->GetForward();
+		if(capacityFactor > 0.95f)
+		{
+			SetMission(Missions::MINE, false);
+			SetMission(Missions::DELIVER, true);
+			target_ = nullptr;
+			return;
+		}
 
-		float dotProduct = glm::dot(direction, forward);
-		glm::vec3 crossProduct = glm::cross(direction, forward);
+		if(!target_)
+		{
+			auto sensor = parent_->GetSensor();
 
-		SetAction(Actions::STEER_LEFT, crossProduct.z > 0.0f);
-		SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);
-		SetAction(Actions::THRUST, (distance > 8.0f && dotProduct > 0.7f) || (distance < 4.0f && dotProduct < -0.7f));
-		SetAction(Actions::RETURN, (distance > 8.0f && dotProduct < -0.7f) || (distance < 4.0f && dotProduct > 0.7f));
-		SetAction(Actions::MINE, distance < 8.0f);
+			GameObject* asteroid = nullptr;
+			if(sensor)
+				asteroid = sensor->GetClosestAsteroid();
+
+			target_ = asteroid;
+		}
+
+		if(target_)
+		{
+			ComputeDistance();
+			ReachTarget(4.0f, 8.0f);
+
+			SetAction(Actions::MINE, distance < 8.0f);
+		}
 	}
+	else if(GetMission(Missions::DELIVER))
+	{
+		if(capacityFactor < 0.05f)
+		{
+			SetMission(Missions::MINE, true);
+			SetMission(Missions::DELIVER, false);
+			target_ = nullptr;
+			return;
+		}
+
+		target_ = parent_->home_;
+		if(target_)
+		{
+			ComputeDistance();
+			ReachTarget(2.5f, 3.0f);
+
+			SetAction(Actions::UNLOAD, distance < 4.0f);
+		}
+	}
+
 }
 
 Controller::~Controller() {

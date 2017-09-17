@@ -19,6 +19,7 @@ Scene* GameObject::mainScene_ = nullptr;
 
 void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller) {
 	parent_ = nullptr;
+	home_ = nullptr;
 	isValid_ = true;
 	isWorking_ = true;
 	isAttached_ = true;
@@ -39,6 +40,9 @@ GameObject::~GameObject() {
 
 void GameObject::UpdateCollisions()
 {
+	if(!isValid_ || !isWorking_)
+		return;
+
 	if(collider_)
 		collider_->Update();
 }

@@ -44,7 +44,7 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 		hull->Initialize(1.0f);
 
 		auto thruster = ship->GetThruster();
-		thruster->Initialize(0.003f, 50.0f);
+		thruster->Initialize(0.002f, 50.0f);
 	}
 	if(shipType == ShipTypes::BARGE)
 	{
@@ -61,7 +61,9 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 		hull->Initialize(2.0f);
 
 		auto thruster = ship->GetThruster();
-		thruster->Initialize(0.01f, 50.0f);
+		thruster->Initialize(0.007f, 50.0f);
+
+		controller->SetMission(Missions::MINE, true);
 	}
 
 	auto healthBar = interface_->healthBars_.allocate();
