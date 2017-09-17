@@ -28,7 +28,7 @@ container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2
 Buffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.095f;
+float Renderer::zoomFactor_ = 0.01f;
 Texture* Renderer::perlinTexture_ = nullptr;
 FramebufferAtlas* Renderer::frameBuffers_ = new FramebufferAtlas();
 
@@ -163,7 +163,7 @@ void Renderer::Initialize(Scene* scene)
 
 void Renderer::DrawScene(Scene* scene)
 {
-	Spaceship* ownShip = scene->ownShip_;
+	Ship* ownShip = scene->ownShip_;
 	glm::vec3 screenCenter(ownShip->transform_->position_.x + -Engine::screen_->getWidthFloating() * 0.5f * zoomFactor_, ownShip->transform_->position_.y + -Engine::screen_->getHeightFloating() * 0.5f * zoomFactor_, 0.0f);
 	glm::mat4 projectionMatrix = glm::ortho<float> (0.0f, Engine::screen_->getWidthFloating() * zoomFactor_, Engine::screen_->getHeightFloating() * zoomFactor_, 0.0f, 0.1f, 10.0f);
 	glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 1.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -235,7 +235,7 @@ void Renderer::DrawScene(Scene* scene)
 	shaderMap_->unuse(Shaders::BODY);
 
 	shaderMap_->use(Shaders::MESH);
-	for(Spaceship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
+	for(Ship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
 		if(ship->isValid_) {
 			glUniform1f(2, ship->GetTransform()->scale_);
 			ship->Draw(matrix_);

@@ -48,12 +48,12 @@ void GameObject::UpdateCollisions()
 }
 
 void GameObject::updatePhysics() {
-	if(rigidBody_ != nullptr)
+	if(rigidBody_)
 		rigidBody_->update(transform_);
 }
 
 void GameObject::updateGravity() {
-	if(rigidBody_ != nullptr)
+	if(rigidBody_)
 		rigidBody_->updateGravity(this);
 }
 
@@ -77,7 +77,7 @@ void GameObject::Destroy()
 
 	if(rigidBody_)
 	{
-		delete rigidBody_;
+		mainScene_->rigidBodies_.deallocate(rigidBody_);
 		rigidBody_ = nullptr;
 	}
 

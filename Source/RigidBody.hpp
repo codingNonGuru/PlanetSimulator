@@ -12,6 +12,7 @@
 
 class GameObject;
 class Transform;
+class Scene;
 typedef glm::vec3 Direction;
 
 class RigidBody {
@@ -35,6 +36,7 @@ public:
 	RigidBody();
 	RigidBody(GameObject*, float, float);
 	virtual ~RigidBody();
+	static RigidBody* Allocate(Scene*, GameObject*, float, float);
 };
 
 #endif /* RIGIDBODY_HPP_ */

@@ -10,7 +10,6 @@
 
 #include "Engine.hpp"
 #include "EventHandler.hpp"
-#include "Spaceship.hpp"
 #include "Planet.hpp"
 #include "Framebuffer.hpp"
 #include "Mesh.hpp"
@@ -26,6 +25,7 @@
 #include "Interface.hpp"
 #include "HealthBar.hpp"
 #include "Factory.hpp"
+#include "Ship.hpp"
 #include "Structure.hpp"
 
 float elapsedTime = 0.0f;
@@ -124,7 +124,7 @@ void initializeGraphics() {
 
 	Transform* transform = nullptr;
 	RigidBody* rigidBody = nullptr;
-	Spaceship* ship = nullptr;
+	Ship* ship = nullptr;
 	HealthBar* healthBar = nullptr;
 
 	ShipFactory::SetScene(&mainScene);
@@ -136,13 +136,14 @@ void initializeGraphics() {
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
 	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
-	rigidBody = new RigidBody(planet, 1.0f, 1.0f);
+	rigidBody = mainScene.rigidBodies_.allocate();
+	rigidBody->Initialize(planet, 1.0f, 1.0f);
 	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 	planet->GetRigidBody()->angularMomentum_ = 0.0002f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
 
 	Asteroid* asteroid;
-	for(int i = 0; i < 50; ++i)
+	for(int i = 0; i < 40; ++i)
 	{
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
@@ -150,7 +151,8 @@ void initializeGraphics() {
 		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
 		float size = utility::biasedRandom(15.0f, 40.0f, 15.0f, 5.0f);
 		transform = new Transform(position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), size);
-		rigidBody = new RigidBody(asteroid, 100.0f, 1.0f);
+		rigidBody = mainScene.rigidBodies_.allocate();
+		rigidBody->Initialize(asteroid, 100.0f, 1.0f);
 		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 		rigidBody->AddOrbitalVelocity(planet);
 		float spin = utility::getRandom(-0.3f, 0.3f);
@@ -164,20 +166,26 @@ void initializeGraphics() {
 	transform = new Transform(Position(30.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 6.0f);
 	outpost->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 	outpost->SetParent(planet);
+	outpost->SetType(StructureTypes::OUTPOST);
 
 	Structure* dock;
 	dock = mainScene.structures_.allocate();
-	transform = new Transform(Position(6.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 2.0f);
+	transform = new Transform(Position(6.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.0f);
 	dock->Initialize(false, &Engine::meshes_[Meshes::DOCK], transform, rigidBody, nullptr);
 	dock->SetParent(outpost);
+	dock->SetType(StructureTypes::DOCK);
 
 	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
 	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
 	mainScene.ownShip_ = ship;
 
-	transform = new Transform(dock->GetWorldPosition(), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
-	ship = ShipFactory::Produce(false, ShipTypes::BARGE, transform);
-	ship->SetHome(outpost);
+	for(int i = 0; i < 12; ++i)
+	{
+		transform = new Transform(dock->GetWorldPosition(), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
+		ship = ShipFactory::Produce(false, ShipTypes::BARGE, transform);
+		ship->SetHome(outpost);
+		outpost->AddShip(ship);
+	}
 
 	Renderer::Initialize(&mainScene);
 
@@ -209,7 +217,7 @@ void initializeSystem() {
 #ifdef GRAVITY
 	printf("Gravity value is: %i!\n", GRAVITY_VALUE);
 #endif
-	mainScene.initialize();
+	mainScene.Initialize();
 	GameObject::mainScene_ = &mainScene;
 
 	interface.Initialize();
@@ -217,7 +225,10 @@ void initializeSystem() {
 	initializeGraphics();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	double value = atof(argv[1]);
+	Renderer::SetZoomFactor(value);
+
 	initializeSystem();
 	EventHandler::Initialize();
 
@@ -225,24 +236,7 @@ int main() {
 		EventHandler::update();
 
 		mainScene.UpdateCollisions();
-		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
-		{
-			if(ship->isValid_ && ship->isWorking_)
-			{
-				ship->updateLogic();
-			}
-		}
-		for(Explosion* explosion = mainScene.explosions_.getStart(); explosion != mainScene.explosions_.getEnd(); ++explosion)
-		{
-			if(explosion->isValid_ && explosion->isWorking_)
-			{
-				explosion->updateLogic();
-			}
-		}
-		for(auto projectile = mainScene.shells_.getStart(); projectile != mainScene.shells_.getEnd(); ++projectile)
-			if(projectile->isValid_ && projectile->isWorking_) {
-				projectile->updateLogic();
-			}
+		mainScene.UpdateLogic();
 
 		for(int i = 0; i < 1; ++i)
 			mainScene.UpdatePhysics();
@@ -259,7 +253,7 @@ int main() {
 				explosion->Destroy();
 				mainScene.explosions_.deallocate(explosion);
 			}
-		for(Spaceship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
+		for(Ship* ship = mainScene.ships_.getStart(); ship != mainScene.ships_.getEnd(); ++ship)
 			if(ship->isValid_ && !ship->isWorking_) {
 				ship->Destroy();
 				mainScene.ships_.deallocate(ship);

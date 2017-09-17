@@ -1,17 +1,15 @@
 #ifndef CONTROLLER_HPP_
 #define CONTROLLER_HPP_
 
-enum class Actions {THRUST, RETURN, BREAK, STEER_RIGHT, STEER_LEFT, SHOOT, COOL, MINE, UNLOAD, COUNT};
-enum class Missions {MINE, DELIVER, COUNT};
-enum class Keys {UP, RIGHT, LEFT, SPACE, COUNT};
+#include "Types.hpp"
 
 class GameObject;
-class Spaceship;
+class Ship;
 
 class Controller {
 protected:
 	GameObject* target_;
-	Spaceship* parent_;
+	Ship* parent_;
 	bool actions_[(int)Actions::COUNT];
 	bool missions_[(int)Missions::COUNT];
 public:
@@ -20,12 +18,13 @@ public:
 	void SetAction(Actions, bool);
 	bool GetMission(Missions);
 	void SetMission(Missions, bool);
-	void Initialize(Spaceship*);
+	void Initialize(Ship*);
 	Controller() {}
 	virtual ~Controller();
 	virtual bool isHuman() const {return false;}
 	void ReachTarget(float, float);
 	void ComputeDistance();
+	bool IsIdle();
 };
 
 class HumanController : public Controller {

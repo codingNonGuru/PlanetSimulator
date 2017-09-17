@@ -8,9 +8,10 @@
 #include "Scene.hpp"
 #include "Controller.hpp"
 #include "Planet.hpp"
-#include "Spaceship.hpp"
 #include "Collider.hpp"
+#include "RigidBody.hpp"
 #include "Explosion.hpp"
+#include "Ship.hpp"
 #include "Structure.hpp"
 
 Scene::Scene() {
@@ -37,7 +38,7 @@ void Execute(ObjectType* start, ObjectType* end, void(ObjectType::*function)())
 	}
 }
 
-void Scene::initialize() {
+void Scene::Initialize() {
 	ownShip_ = nullptr;
 
 	ships_.initialize(32);
@@ -49,8 +50,9 @@ void Scene::initialize() {
 	colliders_.initialize(2048);
 	explosions_.initialize(256);
 	structures_.initialize(128);
+	rigidBodies_.initialize(1024);
 
-	Disable<Spaceship>(ships_.getStart(), ships_.getEnd());
+	Disable<Ship>(ships_.getStart(), ships_.getEnd());
 	Disable<Shell>(shells_.getStart(), shells_.getEnd());
 	Disable<Planet>(planets_.getStart(), planets_.getEnd());
 	Disable<Asteroid>(asteroids_.getStart(), asteroids_.getEnd());
@@ -58,10 +60,20 @@ void Scene::initialize() {
 	Disable<Structure>(structures_.getStart(), structures_.getEnd());
 }
 
+void Scene::UpdateLogic()
+{
+	//std::cout<<rigidBodies_.getSize()<<"\n";
+
+	Execute<Shell>(shells_.getStart(), shells_.getEnd(), &Shell::UpdateLogic);
+	Execute<Ship>(ships_.getStart(), ships_.getEnd(), &Ship::UpdateLogic);
+	Execute<Explosion>(explosions_.getStart(), explosions_.getEnd(), &Explosion::UpdateLogic);
+	Execute<Structure>(structures_.getStart(), structures_.getEnd(), &Structure::UpdateLogic);
+}
+
 void Scene::UpdateCollisions()
 {
 	Execute<Shell>(shells_.getStart(), shells_.getEnd(), &Shell::UpdateCollisions);
-	Execute<Spaceship>(ships_.getStart(), ships_.getEnd(), &Spaceship::UpdateCollisions);
+	Execute<Ship>(ships_.getStart(), ships_.getEnd(), &Ship::UpdateCollisions);
 }
 
 void Scene::UpdatePhysics()
@@ -70,7 +82,7 @@ void Scene::UpdatePhysics()
 		if(asteroid->isValid_)
 			asteroid->updateGravity();
 
-	for(Spaceship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
+	for(Ship* ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
 		if(ship->isValid_ && ship->isWorking_)
 			ship->updatePhysics();
 	for(Shell* projectile = shells_.getStart(); projectile != shells_.getEnd(); ++projectile)

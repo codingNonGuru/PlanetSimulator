@@ -9,35 +9,39 @@
 #define SCENE_HPP_
 
 #include "Memory.hpp"
-#include "Spaceship.hpp"
 #include "Asteroid.hpp"
+#include "Ship.hpp"
 
 class Controller;
 class Planet;
-class Spaceship;
+class Ship;
 class Collider;
+class RigidBody;
 class Explosion;
 class Structure;
 
 class Scene {
 public:
-	container::DynamicPool<Spaceship> ships_;
+	container::DynamicPool<Ship> ships_;
 	container::DynamicPool<Asteroid> asteroids_;
 	container::DynamicPool<Planet> planets_;
-	container::DynamicPool<Controller> controllers_;
 	container::DynamicPool<Shell> shells_;
 	container::DynamicPool<Weapon> weaponSystems_;
-	container::DynamicPool<Collider> colliders_;
 	container::DynamicPool<Explosion> explosions_;
 	container::DynamicPool<Structure> structures_;
 
-	Spaceship* ownShip_;
+	container::DynamicPool<Controller> controllers_;
+	container::DynamicPool<RigidBody> rigidBodies_;
+	container::DynamicPool<Collider> colliders_;
+
+	Ship* ownShip_;
 
 	Scene();
-	void initialize();
+	void Initialize();
 	virtual ~Scene();
 	void UpdatePhysics();
 	void UpdateCollisions();
+	void UpdateLogic();
 };
 
 #endif /* SCENE_HPP_ */

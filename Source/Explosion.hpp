@@ -11,5 +11,5 @@ public:
 	float lifeTime_;
 
 	void Initialize(bool, Mesh*, Transform*, RigidBody*, Controller*) override;
-	void updateLogic() override;
+	void UpdateLogic() override;
 };

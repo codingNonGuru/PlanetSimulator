@@ -1,9 +1,9 @@
 #include "HealthBar.hpp"
-#include "Spaceship.hpp"
 #include "Transform.hpp"
 #include "Mesh.hpp"
+#include "Ship.hpp"
 
-void HealthBar::Initialize(Spaceship* ship, Mesh* mesh)
+void HealthBar::Initialize(Ship* ship, Mesh* mesh)
 {
 	isValid_ = true;
 	isWorking_ = true;

@@ -30,5 +30,6 @@ public:
 	static void DrawInterface(Interface*);
 	static ShaderMap*& GetMap() {return shaderMap_;}
 	static float GetZoomFactor() {return zoomFactor_;}
+	static void SetZoomFactor(float zoomFactor) {zoomFactor_ = zoomFactor;}
 	static Texture* perlinTexture_;
 };

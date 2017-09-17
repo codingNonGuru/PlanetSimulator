@@ -42,7 +42,7 @@ public:
 	virtual void updatePhysics();
 	virtual void UpdateCollisions();
 	virtual void updateGravity();
-	virtual void updateLogic() {}
+	virtual void UpdateLogic() {}
 	GameObject();
 	virtual ~GameObject();
 	RigidBody*& GetRigidBody() { return rigidBody_; }

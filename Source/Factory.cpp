@@ -1,22 +1,23 @@
 #include "Factory.hpp"
-#include "Spaceship.hpp"
 #include "Engine.hpp"
 #include "Scene.hpp"
 #include "Interface.hpp"
 #include "RigidBody.hpp"
 #include "HealthBar.hpp"
 #include "Controller.hpp"
+#include "Ship.hpp"
 
 Scene* ShipFactory::scene_ = nullptr;
 Interface* ShipFactory::interface_ = nullptr;
 
-Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* transform)
+Ship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* transform)
 {
 	auto ship = scene_->ships_.allocate();
 
 	if(shipType == ShipTypes::SCOUT)
 	{
-		RigidBody* rigidBody = new RigidBody(ship, 1.0f, 0.99f);
+		RigidBody* rigidBody = scene_->rigidBodies_.allocate();
+		rigidBody->Initialize(ship, 1.0f, 0.99f);
 		Mesh* mesh = &Engine::meshes_[Meshes::SHIP_SCOUT];
 
 		ship->Initialize(isPlayer, mesh, transform, rigidBody, nullptr);
@@ -32,7 +33,7 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 	}
 	if(shipType == ShipTypes::CORVETTE)
 	{
-		RigidBody* rigidBody = new RigidBody(ship, 2.0f, 0.99f);
+		auto rigidBody = RigidBody::Allocate(scene_, ship, 2.0f, 0.99f);
 		Mesh* mesh = &Engine::meshes_[Meshes::SHIP_CORVETTE];
 
 		ship->Initialize(isPlayer, mesh, transform, rigidBody, nullptr);
@@ -48,7 +49,8 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 	}
 	if(shipType == ShipTypes::BARGE)
 	{
-		RigidBody* rigidBody = new RigidBody(ship, 15.0f, 0.99f);
+		RigidBody* rigidBody = scene_->rigidBodies_.allocate();
+		rigidBody->Initialize(ship, 15.0f, 0.99f);
 		Mesh* mesh = &Engine::meshes_[Meshes::SHIP_BARGE];
 		Controller* controller = scene_->controllers_.allocate<BargeController>();
 
@@ -62,8 +64,6 @@ Spaceship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* tr
 
 		auto thruster = ship->GetThruster();
 		thruster->Initialize(0.007f, 50.0f);
-
-		controller->SetMission(Missions::MINE, true);
 	}
 
 	auto healthBar = interface_->healthBars_.allocate();

@@ -17,7 +17,9 @@
 
 float RigidBody::gravityConstant_ = 0.001f;
 
-RigidBody::RigidBody() {
+RigidBody::RigidBody()
+{
+	parent_ = nullptr;
 }
 
 RigidBody::RigidBody(GameObject* parent, float mass, float drag)
@@ -32,6 +34,14 @@ void RigidBody::Initialize(GameObject* parent, float mass, float drag)
 	drag_ = drag;
 	angularDrag_ = 0.95f;
 	mass_ = mass;
+	velocity_ = Direction(0.0f, 0.0f, 0.0f);
+}
+
+RigidBody* RigidBody::Allocate(Scene* scene, GameObject* parent, float mass, float drag)
+{
+	auto rigidBody = scene->rigidBodies_.allocate();
+	rigidBody->Initialize(parent, mass, drag);
+	return rigidBody;
 }
 
 void RigidBody::update(Transform* transform) {
@@ -68,7 +78,10 @@ void RigidBody::Push(Direction impulse)
 
 void RigidBody::PushForward(float impulse)
 {
-	velocity_ += parent_->GetTransform()->GetForward() * impulse / mass_;
+	if(parent_)
+	{
+		velocity_ += parent_->GetTransform()->GetForward() * impulse / mass_;
+	}
 }
 
 void RigidBody::AddOrbitalVelocity(GameObject* attractor)

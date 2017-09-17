@@ -27,7 +27,16 @@ void Controller::SetMission(Missions mission, bool value)
 	missions_[(int)mission] = value;
 }
 
-void Controller::Initialize(Spaceship* parent)
+bool Controller::IsIdle()
+{
+	for(int i = 0; i < (int)Missions::COUNT; ++i)
+		if(missions_[i])
+			return false;
+
+	return true;
+}
+
+void Controller::Initialize(Ship* parent)
 {
 	parent_ = parent;
 	target_ = nullptr;
@@ -75,8 +84,8 @@ void HumanController::update() {
 
 void MachineController::update() {
 	Scene* scene = GameObject::mainScene_;
-	Spaceship* otherShip = nullptr;
-	for(Spaceship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
+	Ship* otherShip = nullptr;
+	for(Ship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
 	{
 		if(ship->isValid_ && ship->isWorking_ && ship != parent_)
 			otherShip = ship;
@@ -119,7 +128,7 @@ void BargeController::update()
 
 			GameObject* asteroid = nullptr;
 			if(sensor)
-				asteroid = sensor->GetClosestAsteroid();
+				asteroid = sensor->GetRandomAsteroid();
 
 			target_ = asteroid;
 		}

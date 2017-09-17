@@ -6,8 +6,11 @@ void Explosion::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, Rigi
 	lifeTime_ = 0.0f;
 }
 
-void Explosion::updateLogic()
+void Explosion::UpdateLogic()
 {
+	if(!isValid_ || !isWorking_)
+		return;
+
 	lifeTime_ += 0.01f;
 	if(lifeTime_ > 1.0f)
 		isWorking_ = false;

@@ -54,6 +54,7 @@ public:
 	float GetLimit() {return distanceLimit_;}
 	void SetLimit(float distanceLimit) {distanceLimit_ = distanceLimit;}
 	GameObject* GetClosestAsteroid();
+	GameObject* GetRandomAsteroid();
 };
 
 class Thruster {
@@ -86,7 +87,7 @@ public:
 	float GetCapacityFactor() const {return mineralOre_ / capacity_;}
 };
 
-class Spaceship : public GameObject {
+class Ship : public GameObject {
 public:
 	ShipTypes type_;
 
@@ -96,17 +97,21 @@ public:
 	Hull hull_;
 	Thruster thruster_;
 
-	void updateLogic() override;
+	Ship();
+	virtual ~Ship();
+
+	void UpdateLogic() override;
 	void Initialize(bool, Mesh*, Transform*, RigidBody*, Controller*) override;
 	void OnDraw(Matrix&, Matrix&) override;
-	Spaceship();
-	virtual ~Spaceship();
-	bool IsControlled() override {return true;}
 	Weapon* GetWeapon() override {return weapon_;}
 	Hull* GetHull() {return &hull_;}
 	Sensor* GetSensor() {return &sensor_;}
 	Thruster* GetThruster() {return &thruster_;}
 	void Collide(Collision*) override;
+
+	bool IsControlled() override {return true;}
+	bool IsIdle();
+	void AssignMission(Missions);
 };
 
 class Shell : public GameObject {
@@ -114,7 +119,7 @@ public:
 	float lifeTime_;
 
 	void Initialize(bool, Mesh*, Transform*, RigidBody*, Controller*) override;
-	void updateLogic() override;
+	void UpdateLogic() override;
 	void Collide(Collision*) override;
 };
 

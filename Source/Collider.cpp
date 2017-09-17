@@ -22,7 +22,7 @@ void Collider::Update()
 		if(projectile->isValid_ && projectile->isWorking_ && projectile != parent_)
 			Resolve(projectile);
 	}
-	for(Spaceship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
+	for(Ship* ship = scene->ships_.getStart(); ship != scene->ships_.getEnd(); ++ship)
 	{
 		if(ship->isValid_ && ship->isWorking_ && ship != parent_)
 			Resolve(ship);

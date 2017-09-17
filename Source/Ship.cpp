@@ -5,11 +5,12 @@
  *      Author: andrei
  */
 
+#include "Ship.hpp"
+
 #include <string.h>
 #include <iostream>
 #include <math.h>
 
-#include "Spaceship.hpp"
 #include "Engine.hpp"
 #include "EventHandler.hpp"
 #include "Controller.hpp"
@@ -22,9 +23,12 @@
 #include "Explosion.hpp"
 #include "HealthBar.hpp"
 
-Spaceship::Spaceship() {}
+Ship::Ship() {}
 
-void Spaceship::updateLogic() {
+void Ship::UpdateLogic() {
+	if(!isValid_ || !isWorking_)
+		return;
+
 	if(hull_.GetDamage() <= 0.0f)
 	{
 		isWorking_ = false;
@@ -46,10 +50,10 @@ void Spaceship::updateLogic() {
 			Position position = transform_->position_ + shootDirection * utility::getRandom(0.2f, 0.3f);
 			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
 			Transform* transform = new Transform(position, rotation, 0.4f);
-			RigidBody* rigidBody = new RigidBody(shell, 1.0f, 0.995f);
+			RigidBody* shellRigidBody = RigidBody::Allocate(mainScene_, shell, 1.0f, 0.995f);
 
-			shell->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, rigidBody, nullptr);
-			rigidBody->PushForward(speed);
+			shell->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, shellRigidBody, nullptr);
+			shellRigidBody->PushForward(speed);
 			shell->SetParent(this);
 
 			shell->isAttached_ = false;
@@ -114,11 +118,36 @@ GameObject* Sensor::GetClosestAsteroid()
 	return closestAsteroid;
 }
 
-Spaceship::~Spaceship() {
+GameObject* Sensor::GetRandomAsteroid()
+{
+	Asteroid* closestAsteroid = nullptr;
+	for(auto asteroid = GameObject::mainScene_->asteroids_.getStart(); asteroid != GameObject::mainScene_->asteroids_.getEnd(); ++asteroid)
+	{
+		if(asteroid->isValid_)
+		{
+			auto direction = parent_->transform_->position_ - asteroid->transform_->position_;
+			float distance = glm::length(direction);
+			if(distance < GetLimit() * 10.0f)
+			{
+				closestAsteroid = asteroid;
+				if(utility::throwChance(0.02f))
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	SetObject(closestAsteroid);
+
+	return closestAsteroid;
+}
+
+Ship::~Ship() {
 	// TODO Auto-generated destructor stub
 }
 
-void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller) {
+void Ship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller) {
 	GameObject::Initialize(isPlayer, mesh, transform, rigidBody, controller);
 	strcpy(name_, "spaceship");
 
@@ -152,12 +181,12 @@ void Spaceship::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, Rigi
 		controller_->Initialize(this);
 }
 
-void Spaceship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
+void Ship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
 {
 	//healthBar_->GetMesh()->draw(finalMatrix, worldMatrix);
 }
 
-void Spaceship::Collide(Collision* collision)
+void Ship::Collide(Collision* collision)
 {
 	bool isCollisionValid = collision->collider_->parent_ != this;
 	if(isCollisionValid)
@@ -166,7 +195,26 @@ void Spaceship::Collide(Collision* collision)
 	}
 }
 
-void Shell::updateLogic() {
+bool Ship::IsIdle()
+{
+	if(controller_)
+	{
+		return controller_->IsIdle();
+	}
+	else
+		return false;
+}
+
+void Ship::AssignMission(Missions mission)
+{
+	if(controller_)
+		controller_->SetMission(mission, true);
+}
+
+void Shell::UpdateLogic() {
+	if(!isValid_ || !isWorking_)
+		return;
+
 	lifeTime_ += 0.01f;
 	if(lifeTime_ > 3.0f)
 	{
