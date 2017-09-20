@@ -22,7 +22,8 @@ void HealthBar::Draw(Matrix& finalMatrix)
 		return;
 	}
 
-	Matrix worldMatrix = ship_->GetTransform()->GetPositionMatrix();
+	//Matrix worldMatrix = ship_->GetTransform()->GetPositionMatrix();
+	Matrix worldMatrix = ship_->GetWorldPositionMatrix();
 
 	if(mesh_)
 		mesh_->draw(finalMatrix, worldMatrix);

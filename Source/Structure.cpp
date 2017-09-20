@@ -11,13 +11,13 @@ void Structure::SetType(StructureTypes type)
 	}
 	else if(type_ == StructureTypes::OUTPOST)
 	{
-		ships_.initialize(16);
+		ships_.initialize(32);
 		for(auto ship = ships_.getStart(); ship != ships_.getEnd(); ++ship)
 		{
 			*ship = nullptr;
 		}
-		lastLaunch_ = 0;
-		launchInterval_ = 200;
+		launchInterval_ = 30;
+		lastLaunch_ = launchInterval_ / 2;
 	}
 }
 

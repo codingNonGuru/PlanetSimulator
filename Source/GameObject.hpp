@@ -26,8 +26,8 @@ class GameObject {
 public:
 	static Scene* mainScene_;
 
-	GameObject* parent_;
-	GameObject* home_;
+	GameObject* pivot_;
+	GameObject* origin_;
 	char name_[16];
 	Mesh* mesh_;
 	Transform* transform_;
@@ -51,12 +51,15 @@ public:
 	Collider* GetCollider() {return collider_;}
 	virtual Weapon* GetWeapon() {return nullptr;}
 	virtual bool IsControlled() {return false;}
-	void SetParent(GameObject* parent) {parent_ = parent;}
-	void SetHome(GameObject* home) {home_ = home;}
+	void SetPivot(GameObject* pivot) {pivot_ = pivot;}
+	void SetOrigin(GameObject* origin) {origin_ = origin;}
 	virtual void Collide(Collision*) {}
 	void Destroy();
 	Position GetWorldPosition();
 	Rotation GetWorldRotation();
+	Matrix GetWorldPositionMatrix();
+	void Attach(GameObject*);
+	void Detach();
 };
 
 #endif /* GAMEOBJECT_HPP_ */

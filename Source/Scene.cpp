@@ -13,6 +13,7 @@
 #include "Explosion.hpp"
 #include "Ship.hpp"
 #include "Structure.hpp"
+#include "Transform.hpp"
 
 Scene::Scene() {
 	// TODO Auto-generated constructor stub
@@ -41,15 +42,18 @@ void Execute(ObjectType* start, ObjectType* end, void(ObjectType::*function)())
 void Scene::Initialize() {
 	ownShip_ = nullptr;
 
-	ships_.initialize(32);
 	planets_.initialize(32);
 	asteroids_.initialize(256);
-	controllers_.initialize(128);
+
+	ships_.initialize(64);
 	shells_.initialize(1024);
 	weaponSystems_.initialize(512);
-	colliders_.initialize(2048);
 	explosions_.initialize(256);
 	structures_.initialize(128);
+
+	transforms_.initialize(4096);
+	controllers_.initialize(128);
+	colliders_.initialize(2048);
 	rigidBodies_.initialize(1024);
 
 	Disable<Ship>(ships_.getStart(), ships_.getEnd());
@@ -96,7 +100,8 @@ void Scene::UpdatePhysics()
 			asteroid->updatePhysics();
 }
 
-Scene::~Scene() {
+Scene::~Scene()
+{
 	// TODO Auto-generated destructor stub
 }
 

@@ -19,20 +19,28 @@ class Collider;
 class RigidBody;
 class Explosion;
 class Structure;
+class Transform;
+
+template <class Type>
+using Array = container::Array<Type>;
+template <class Type>
+using Pool = container::DynamicPool<Type>;
 
 class Scene {
 public:
-	container::DynamicPool<Ship> ships_;
-	container::DynamicPool<Asteroid> asteroids_;
-	container::DynamicPool<Planet> planets_;
-	container::DynamicPool<Shell> shells_;
-	container::DynamicPool<Weapon> weaponSystems_;
-	container::DynamicPool<Explosion> explosions_;
-	container::DynamicPool<Structure> structures_;
+	Array <Asteroid> asteroids_;
+	Array <Planet> planets_;
 
-	container::DynamicPool<Controller> controllers_;
-	container::DynamicPool<RigidBody> rigidBodies_;
-	container::DynamicPool<Collider> colliders_;
+	Pool <Ship> ships_;
+	Pool <Shell> shells_;
+	Pool <Weapon> weaponSystems_;
+	Pool <Explosion> explosions_;
+	Pool <Structure> structures_;
+
+	Pool <Transform> transforms_;
+	Pool <Controller> controllers_;
+	Pool <RigidBody> rigidBodies_;
+	Pool <Collider> colliders_;
 
 	Ship* ownShip_;
 

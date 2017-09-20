@@ -204,7 +204,7 @@ void Renderer::DrawScene(Scene* scene)
 		if(planet->isValid_)
 		{
 			*positionBuffer_.allocate() = planet->transform_->position_;
-			*scaleBuffer_.allocate() = 25.0f;
+			*scaleBuffer_.allocate() = planet->GetTransform()->scale_;
 			*rotationBuffer_.allocate() = planet->transform_->rotation_.z;
 			*highlightBuffer_.allocate() = 0.0f;
 			*resolutionBuffer_.allocate() = 64;

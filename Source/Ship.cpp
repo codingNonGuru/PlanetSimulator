@@ -49,12 +49,12 @@ void Ship::UpdateLogic() {
 
 			Position position = transform_->position_ + shootDirection * utility::getRandom(0.2f, 0.3f);
 			Rotation rotation = Rotation(0.0f, 0.0f, shootAngle);
-			Transform* transform = new Transform(position, rotation, 0.4f);
+			Transform* transform = Transform::Allocate(mainScene_, position, rotation, 0.4f);
 			RigidBody* shellRigidBody = RigidBody::Allocate(mainScene_, shell, 1.0f, 0.995f);
 
 			shell->Initialize(false, &Engine::meshes_[Meshes::SHELL], transform, shellRigidBody, nullptr);
 			shellRigidBody->PushForward(speed);
-			shell->SetParent(this);
+			shell->SetPivot(this);
 
 			shell->isAttached_ = false;
 		}
@@ -88,10 +88,15 @@ void Ship::UpdateLogic() {
 	}
 	if(controller_->IsActing(Actions::UNLOAD))
 	{
-		if(home_)
+		if(origin_)
 		{
 			cargo_.RemoveOre(0.002f);
 		}
+	}
+
+	if(controller_->IsActing(Actions::DETACH))
+	{
+		Detach();
 	}
 }
 
@@ -121,22 +126,24 @@ GameObject* Sensor::GetClosestAsteroid()
 GameObject* Sensor::GetRandomAsteroid()
 {
 	Asteroid* closestAsteroid = nullptr;
-	for(auto asteroid = GameObject::mainScene_->asteroids_.getStart(); asteroid != GameObject::mainScene_->asteroids_.getEnd(); ++asteroid)
+	int index = utility::getRandom(0, GameObject::mainScene_->asteroids_.getSize() - 1);
+	closestAsteroid = GameObject::mainScene_->asteroids_.get(index);
+	/*for(auto asteroid = GameObject::mainScene_->asteroids_.getStart(); asteroid != GameObject::mainScene_->asteroids_.getEnd(); ++asteroid)
 	{
 		if(asteroid->isValid_)
 		{
 			auto direction = parent_->transform_->position_ - asteroid->transform_->position_;
 			float distance = glm::length(direction);
-			if(distance < GetLimit() * 10.0f)
+			if(distance < GetLimit() * 20.0f)
 			{
 				closestAsteroid = asteroid;
-				if(utility::throwChance(0.02f))
+				if(utility::throwChance(0.05f))
 				{
 					break;
 				}
 			}
 		}
-	}
+	}*/
 
 	SetObject(closestAsteroid);
 
@@ -188,7 +195,7 @@ void Ship::OnDraw(Matrix& finalMatrix, Matrix& worldMatrix)
 
 void Ship::Collide(Collision* collision)
 {
-	bool isCollisionValid = collision->collider_->parent_ != this;
+	bool isCollisionValid = collision->collider_->pivot_ != this;
 	if(isCollisionValid)
 	{
 		hull_.Damage(nullptr);
@@ -233,13 +240,12 @@ void Shell::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBod
 
 void Shell::Collide(Collision* collision)
 {
-	bool isCollisionValid = collision->collider_ != parent_;
+	bool isCollisionValid = collision->collider_ != pivot_;
 	if(isCollisionValid)
 	{
 		isWorking_ = false;
 		Explosion* explosion = mainScene_->explosions_.allocate();
-		Transform* transform = new Transform();
-		*transform = *transform_;
+		Transform* transform = Transform::Allocate(mainScene_, transform_);
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
 		transform->scale_ = 2.0f;
 		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr, nullptr);

@@ -114,6 +114,8 @@ void BargeController::update()
 
 	if(GetMission(Missions::MINE))
 	{
+		SetAction(Actions::DETACH, parent_->isAttached_);
+
 		if(capacityFactor > 0.95f)
 		{
 			SetMission(Missions::MINE, false);
@@ -151,7 +153,7 @@ void BargeController::update()
 			return;
 		}
 
-		target_ = parent_->home_;
+		target_ = parent_->origin_;
 		if(target_)
 		{
 			ComputeDistance();

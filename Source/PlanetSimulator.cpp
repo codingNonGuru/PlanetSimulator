@@ -135,9 +135,8 @@ void initializeGraphics() {
 
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
-	transform = new Transform(Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 20.0f);
-	rigidBody = mainScene.rigidBodies_.allocate();
-	rigidBody->Initialize(planet, 1.0f, 1.0f);
+	transform = Transform::Allocate(&mainScene, Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 2.0f);
+	rigidBody = RigidBody::Allocate(&mainScene, planet, 1.0f, 1.0f);
 	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 	planet->GetRigidBody()->angularMomentum_ = 0.0002f;
 	planet->GetRigidBody()->angularDrag_ = 1.0f;
@@ -150,9 +149,8 @@ void initializeGraphics() {
 		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
 		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
 		float size = utility::biasedRandom(15.0f, 40.0f, 15.0f, 5.0f);
-		transform = new Transform(position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), size);
-		rigidBody = mainScene.rigidBodies_.allocate();
-		rigidBody->Initialize(asteroid, 100.0f, 1.0f);
+		transform = Transform::Allocate(&mainScene, position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), size);
+		rigidBody = RigidBody::Allocate(&mainScene, asteroid, 100.0f, 1.0f);
 		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 		rigidBody->AddOrbitalVelocity(planet);
 		float spin = utility::getRandom(-0.3f, 0.3f);
@@ -163,27 +161,28 @@ void initializeGraphics() {
 
 	Structure* outpost;
 	outpost = mainScene.structures_.allocate();
-	transform = new Transform(Position(30.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 6.0f);
-	outpost->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
-	outpost->SetParent(planet);
+	transform = Transform::Allocate(&mainScene, Position(30.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 6.0f);
+	outpost->Initialize(false, &Engine::meshes_[Meshes::DOCK], transform, rigidBody, nullptr);
+	outpost->SetPivot(planet);
 	outpost->SetType(StructureTypes::OUTPOST);
 
 	Structure* dock;
 	dock = mainScene.structures_.allocate();
-	transform = new Transform(Position(6.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.0f);
+	transform = Transform::Allocate(&mainScene, Position(6.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.0f);
 	dock->Initialize(false, &Engine::meshes_[Meshes::DOCK], transform, rigidBody, nullptr);
-	dock->SetParent(outpost);
+	dock->SetPivot(outpost);
 	dock->SetType(StructureTypes::DOCK);
 
-	transform = new Transform(Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
+	transform = Transform::Allocate(&mainScene, Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
 	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
 	mainScene.ownShip_ = ship;
 
-	for(int i = 0; i < 12; ++i)
+	for(int i = 0; i < 30; ++i)
 	{
-		transform = new Transform(dock->GetWorldPosition(), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
+		transform = Transform::Allocate(&mainScene, Position(5.0f, (float(i) - 2.5f) * 0.01f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
 		ship = ShipFactory::Produce(false, ShipTypes::BARGE, transform);
-		ship->SetHome(outpost);
+		ship->SetOrigin(outpost);
+		ship->Attach(outpost);
 		outpost->AddShip(ship);
 	}
 

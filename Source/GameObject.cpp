@@ -18,8 +18,8 @@
 Scene* GameObject::mainScene_ = nullptr;
 
 void GameObject::Initialize(bool isPlayer, Mesh* mesh, Transform* transform, RigidBody* rigidBody, Controller* controller) {
-	parent_ = nullptr;
-	home_ = nullptr;
+	pivot_ = nullptr;
+	origin_ = nullptr;
 	isValid_ = true;
 	isWorking_ = true;
 	isAttached_ = true;
@@ -67,7 +67,7 @@ void GameObject::Draw(Matrix &finalMatrix) {
 void GameObject::Destroy()
 {
 	isValid_ = false;
-	parent_ = nullptr;
+	pivot_ = nullptr;
 
 	if(controller_)
 	{
@@ -83,7 +83,7 @@ void GameObject::Destroy()
 
 	if(transform_)
 	{
-		delete transform_;
+		mainScene_->transforms_.deallocate(transform_);
 		transform_ = nullptr;
 	}
 
@@ -100,7 +100,7 @@ Position GameObject::GetWorldPosition()
 		return transform_->position_;
 
 	Position position = transform_->position_;
-	GameObject* parent = parent_;
+	GameObject* parent = pivot_;
 	while(true)
 	{
 		if(parent)
@@ -115,7 +115,7 @@ Position GameObject::GetWorldPosition()
 			position.x = parent->transform_->position_.x + x;
 			position.y = parent->transform_->position_.y + y;
 
-			parent = parent->parent_;
+			parent = parent->pivot_;
 		}
 		else
 		{
@@ -132,14 +132,14 @@ Rotation GameObject::GetWorldRotation()
 		return transform_->rotation_;
 
 	Rotation rotation = transform_->rotation_;
-	GameObject* parent = parent_;
+	GameObject* parent = pivot_;
 	while(true)
 	{
 		if(parent)
 		{
 			rotation += parent->transform_->rotation_;
 
-			parent = parent->parent_;
+			parent = parent->pivot_;
 		}
 		else
 		{
@@ -148,5 +148,29 @@ Rotation GameObject::GetWorldRotation()
 	}
 
 	return rotation;
+}
+
+Matrix GameObject::GetWorldPositionMatrix()
+{
+	Position position = GetWorldPosition();
+
+	Matrix modelMatrix =
+		glm::translate(Matrix(1.0f), position) *
+		glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
+	return modelMatrix;
+}
+
+void GameObject::Attach(GameObject* parent)
+{
+	pivot_ = parent;
+	isAttached_ = true;
+}
+
+void GameObject::Detach()
+{
+	transform_->position_ = GetWorldPosition();
+	transform_->rotation_ = GetWorldRotation();
+	isAttached_ = false;
 }
 
