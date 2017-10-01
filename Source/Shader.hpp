@@ -7,13 +7,13 @@ typedef unsigned int GLenum;
 enum class Shaders {
 	SPRITE,
 	POSTPROCESS,
-	PARTICLES_COMPUTE,
-	PARTICLES_INSTANCED,
 	MESH,
 	BODY,
 	EXPLOSION,
 	HEALTH_BAR,
 	SHELL,
+	PARTICLE_START,
+	PARTICLE_UPDATE,
 	COUNT
 };
 
@@ -33,6 +33,7 @@ public:
 	void initialize(const char*, const char*);
 	void initialize(const char*, const char*, const char*);
 	Shader() {}
+	Shader(const char*);
 	Shader(const char*, const char*);
 	~Shader(void);
 	void use();

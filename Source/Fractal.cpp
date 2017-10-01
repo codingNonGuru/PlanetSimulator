@@ -214,7 +214,7 @@ void Perlin::initialize() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	glGenBuffers(1, &streamBuffer_);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, streamBuffer_);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, stream.getMemoryUse(), stream.getStart(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, stream.getMemorySize(), stream.getStart(), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	shader_ = new Shader();

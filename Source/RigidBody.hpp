@@ -9,18 +9,18 @@
 #define RIGIDBODY_HPP_
 
 #include <glm.hpp>
+#include "Conventions.hpp"
 
 class GameObject;
 class Transform;
 class Scene;
-typedef glm::vec3 Direction;
 
 class RigidBody {
 public:
 	static float gravityConstant_;
 
 	GameObject* parent_;
-	glm::vec3 velocity_;
+	Direction velocity_;
 	float angularMomentum_;
 	float mass_;
 	float drag_;

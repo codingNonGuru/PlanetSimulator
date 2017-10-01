@@ -27,21 +27,13 @@
 #include "Factory.hpp"
 #include "Ship.hpp"
 #include "Structure.hpp"
+#include "ParticleManager.hpp"
 
 float elapsedTime = 0.0f;
-Planet* planets = NULL;
-int planetCount = 3;
 GLuint planetVertexBuffer, planetCoordBuffer, planetVAO, postprocessVAO, particleVAO;
 GLuint posSSBO, velSSBO, particleCount = 1024;
-int frames = 0;
 Scene mainScene;
 Interface interface;
-
-void bindTexture(Shaders shader, const char* name, unsigned int index, unsigned int textureKey) {
-	glUniform1i(Renderer::GetMap()->getTextureLocation(shader, name), index);
-	glActiveTexture(GL_TEXTURE0 + index);
-	glBindTexture(GL_TEXTURE_2D, textureKey);
-}
 
 void Draw() {
 	/*materialAtlas.use(Shaders::PARTICLES_COMPUTE);
@@ -135,7 +127,7 @@ void initializeGraphics() {
 
 	Planet* planet;
 	planet = mainScene.planets_.allocate();
-	transform = Transform::Allocate(&mainScene, Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 2.0f);
+	transform = Transform::Allocate(&mainScene, Position(0.0f, 0.0f), Rotation(0.0f), 25.0f);
 	rigidBody = RigidBody::Allocate(&mainScene, planet, 1.0f, 1.0f);
 	planet->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 	planet->GetRigidBody()->angularMomentum_ = 0.0002f;
@@ -147,9 +139,9 @@ void initializeGraphics() {
 		asteroid = mainScene.asteroids_.allocate();
 		float angle = utility::getRandom(0.0f, 6.2831f);
 		float radius = utility::biasedRandom(240.0f, 320.0f, 280.0f, 30.0f);
-		auto position = Position(cos(angle) * radius, sin(angle) * radius, 0.0f);
+		auto position = Position(cos(angle) * radius, sin(angle) * radius);
 		float size = utility::biasedRandom(15.0f, 40.0f, 15.0f, 5.0f);
-		transform = Transform::Allocate(&mainScene, position, Rotation(0.0f, 0.0f, utility::getRandom(0.0f, 6.2831f)), size);
+		transform = Transform::Allocate(&mainScene, position, Rotation(utility::getRandom(0.0f, 6.2831f)), size);
 		rigidBody = RigidBody::Allocate(&mainScene, asteroid, 100.0f, 1.0f);
 		asteroid->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, rigidBody, nullptr);
 		rigidBody->AddOrbitalVelocity(planet);
@@ -161,25 +153,25 @@ void initializeGraphics() {
 
 	Structure* outpost;
 	outpost = mainScene.structures_.allocate();
-	transform = Transform::Allocate(&mainScene, Position(30.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 6.0f);
+	transform = Transform::Allocate(&mainScene, Position(30.0f, 0.0f), Rotation(0.0f), 6.0f);
 	outpost->Initialize(false, &Engine::meshes_[Meshes::DOCK], transform, rigidBody, nullptr);
 	outpost->SetPivot(planet);
 	outpost->SetType(StructureTypes::OUTPOST);
 
 	Structure* dock;
 	dock = mainScene.structures_.allocate();
-	transform = Transform::Allocate(&mainScene, Position(6.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.0f);
+	transform = Transform::Allocate(&mainScene, Position(6.0f, 0.0f), Rotation(0.0f), 0.0f);
 	dock->Initialize(false, &Engine::meshes_[Meshes::DOCK], transform, rigidBody, nullptr);
 	dock->SetPivot(outpost);
 	dock->SetType(StructureTypes::DOCK);
 
-	transform = Transform::Allocate(&mainScene, Position(45.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
+	transform = Transform::Allocate(&mainScene, Position(45.0f, 0.0f), Rotation(0.0f), 0.3f);
 	ship = ShipFactory::Produce(true, ShipTypes::CORVETTE, transform);
 	mainScene.ownShip_ = ship;
 
-	for(int i = 0; i < 30; ++i)
+	for(int i = 0; i < 8; ++i)
 	{
-		transform = Transform::Allocate(&mainScene, Position(5.0f, (float(i) - 2.5f) * 0.01f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), 0.3f);
+		transform = Transform::Allocate(&mainScene, Position(5.0f, (float(i) - 2.5f) * 0.01f), Rotation(0.0f), 0.3f);
 		ship = ShipFactory::Produce(false, ShipTypes::BARGE, transform);
 		ship->SetOrigin(outpost);
 		ship->Attach(outpost);
@@ -225,17 +217,21 @@ void initializeSystem() {
 }
 
 int main(int argc, char* argv[]) {
-	double value = atof(argv[1]);
-	Renderer::SetZoomFactor(value);
+	//double value = atof(argv[1]);
+	//Renderer::SetZoomFactor(value);
 
 	initializeSystem();
 	EventHandler::Initialize();
+	//ParticleManager::Initialize();
 
 	while(Engine::IsRunning()){
 		EventHandler::update();
 
 		mainScene.UpdateCollisions();
 		mainScene.UpdateLogic();
+
+		//ParticleManager::FlushQueue();
+		//ParticleManager::Update();
 
 		for(int i = 0; i < 1; ++i)
 			mainScene.UpdatePhysics();

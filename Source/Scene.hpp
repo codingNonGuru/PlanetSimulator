@@ -20,6 +20,7 @@ class RigidBody;
 class Explosion;
 class Structure;
 class Transform;
+class ParticleManager;
 
 template <class Type>
 using Array = container::Array<Type>;

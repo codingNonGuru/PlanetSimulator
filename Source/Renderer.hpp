@@ -2,23 +2,24 @@
 
 #include <glm.hpp>
 #include "Memory.hpp"
+#include "Conventions.hpp"
 
 class Scene;
 class Interface;
-class Buffer;
+class MasterBuffer;
 class ShaderMap;
 class Texture;
 class FramebufferAtlas;
 
 class Renderer {
-	static container::Array<glm::vec3> positionBuffer_;
-	static container::Array<float> scaleBuffer_;
-	static container::Array<float> rotationBuffer_;
+	static container::Array<Position> positionBuffer_;
+	static container::Array<Scale> scaleBuffer_;
+	static container::Array<Rotation> rotationBuffer_;
 	static container::Array<float> highlightBuffer_;
 	static container::Array<int> resolutionBuffer_;
 	static container::Array<float> contrastBuffer_;
 	static container::Array<glm::vec2> offsetBuffer_;
-	static Buffer* bodyBuffer_;
+	static MasterBuffer* bodyBuffer_;
 	static ShaderMap* shaderMap_;
 	static glm::mat4 matrix_;
 	static float zoomFactor_;

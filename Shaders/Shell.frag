@@ -17,9 +17,9 @@ void main() {
 	float firstAlpha = dist * dist * 0.0f + dist * (1.0f - dist) * 0.0f + (1.0f - dist) * (1.0f - dist) * 1.0f;
 	
 	float secondAlpha = firstAlpha;
-	secondAlpha  = pow(secondAlpha, 12.0f);
+	secondAlpha  = pow(secondAlpha, 10.0f);
 	
-	firstAlpha *= 0.5f;
+	firstAlpha *= 0.3f;
 	
 	alpha = firstAlpha * 0.7f * speed + secondAlpha * 0.3f;
 	alpha *= speed;

@@ -65,12 +65,14 @@ void Shader::initialize(const char* computeShaderPath) {
 	linkShaders();
 }
 
+Shader::Shader(const char* computeShaderPath)
+{
+	initialize(computeShaderPath);
+}
 
-Shader::Shader(const char* vertShaderPath, const char* fragShaderPath) {
-	/*vertString = vertShaderPath;
-	fragString = fragShaderPath;
-	compileShader(vertShaderPath, fragShaderPath);
-	linkShaders();*/
+Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
+{
+	initialize(vertShaderPath, fragShaderPath);
 }
 
 Shader::~Shader(void) {

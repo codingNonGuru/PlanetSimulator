@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string.h>
 
 class MemoryLog {
 public:
@@ -8,6 +9,15 @@ public:
 
 	static void accrue(int64_t);
 };
+
+namespace container
+{
+	template<int Size>
+	class String;
+}
+
+typedef container::String<16> ShortWord;
+typedef container::String<32> LongWord;
 
 namespace container {
 	template<class O, typename I>
@@ -351,6 +361,10 @@ namespace container {
 			return objectCount_ * sizeof(O);
 		}
 
+		unsigned int getMemoryCapacity() {
+			return size_ * sizeof(O);
+		}
+
 		void insert(O* from, O first, O last) {
 			O iterator_2 = first;
 			for(O* iterator = from; iterator_2 != last + 1; ++iterator, ++iterator_2) {
@@ -366,10 +380,6 @@ namespace container {
 			from += (last - first);
 		}
 
-		I getMemoryUse() const {
-			return memorySize_;
-		}
-
 		void setAllToNull() {
 			for(unsigned int* iterator = (unsigned int*)objectStart_; iterator != (unsigned int*)objectStart_ + (memorySize_ / sizeof(unsigned int)); ++iterator)
 				*iterator = 0;
@@ -382,6 +392,73 @@ namespace container {
 			objectStart_ = nullptr;
 
 			MemoryLog::accrue(-memorySize_);
+		}
+	};
+
+	template<int Size>
+	class String
+	{
+		char values_[Size];
+	public:
+		String() {}
+
+		String(const char* values)
+		{
+			strcpy(values_, values);
+		}
+
+		operator char*()
+		{
+			return values_;
+		}
+	};
+
+	template<class Value, class Key = ShortWord>
+	class StaticMap
+	{
+		Key* keys_;
+		Value* values_;
+		int size_;
+		int capacity_;
+
+	public:
+		StaticMap() {}
+
+		StaticMap(int capacity)
+		{
+			Initialize(capacity);
+		}
+
+		void Initialize(int capacity)
+		{
+			size_ = 0;
+			capacity_ = capacity;
+
+			keys_ = new Key[capacity];
+			values_ = new Value[capacity];
+		}
+
+		Value* Get(Key key)
+		{
+			int index = 0;
+			for(auto currentKey = keys_; currentKey != keys_ + size_; ++currentKey)
+			{
+				if(strcmp(*currentKey, key) == 0)
+					return values_ + index;
+				index++;
+			}
+			return nullptr;
+		}
+
+		Value* Allocate(Key key)
+		{
+			if(size_ == capacity_)
+				return nullptr;
+
+			auto value = values_ + size_;
+			*(keys_ + size_) = key;
+			size_++;
+			return value;
 		}
 	};
 
@@ -646,6 +723,7 @@ namespace container {
 		}
 	};
 }
+
 namespace container {
 	template<class O, typename Iobject, typename Iindex>
 	StaticFragmentedPoolDynamicBlocked<O, Iobject, Iindex>::StaticFragmentedPoolDynamicBlocked() {}

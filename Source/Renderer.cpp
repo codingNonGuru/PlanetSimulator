@@ -17,18 +17,19 @@
 #include "Explosion.hpp"
 #include "HealthBar.hpp"
 #include "RigidBody.hpp"
+#include "ParticleManager.hpp"
 
-container::Array<glm::vec3> Renderer::positionBuffer_ = container::Array<glm::vec3>();
-container::Array<float> Renderer::scaleBuffer_ = container::Array<float>();
-container::Array<float> Renderer::rotationBuffer_ = container::Array<float>();
-container::Array<float> Renderer::highlightBuffer_ = container::Array<float>();
-container::Array<int> Renderer::resolutionBuffer_ = container::Array<int>();
-container::Array<float> Renderer::contrastBuffer_ = container::Array<float>();
-container::Array<glm::vec2> Renderer::offsetBuffer_ = container::Array<glm::vec2>();
-Buffer* Renderer::bodyBuffer_ = nullptr;
+container::Array <Position> Renderer::positionBuffer_ = container::Array <Position>();
+container::Array <Scale> Renderer::scaleBuffer_ = container::Array <Scale>();
+container::Array <Rotation> Renderer::rotationBuffer_ = container::Array <Rotation>();
+container::Array <float> Renderer::highlightBuffer_ = container::Array <float>();
+container::Array <int> Renderer::resolutionBuffer_ = container::Array <int>();
+container::Array <float> Renderer::contrastBuffer_ = container::Array <float>();
+container::Array <glm::vec2> Renderer::offsetBuffer_ = container::Array <glm::vec2>();
+MasterBuffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.01f;
+float Renderer::zoomFactor_ = 0.3f;
 Texture* Renderer::perlinTexture_ = nullptr;
 FramebufferAtlas* Renderer::frameBuffers_ = new FramebufferAtlas();
 
@@ -70,76 +71,33 @@ void Renderer::Initialize(Scene* scene)
 	shaderMap_->initialize(Shaders::SPRITE, "Shaders/Sprite.vert", "Shaders/Sprite.frag", nullptr);
 	shaderMap_->initialize(Shaders::BODY, "Shaders/Body.vert", "Shaders/Body.frag", "Shaders/Body.geom");
 	shaderMap_->initialize(Shaders::POSTPROCESS, "Shaders/Postprocess.vert", "Shaders/Postprocess.frag", nullptr);
-	shaderMap_->initialize(Shaders::PARTICLES_COMPUTE, "Shaders/ParticlesCompute.comp", nullptr, nullptr);
-	shaderMap_->initialize(Shaders::PARTICLES_INSTANCED, "Shaders/ParticlesInstanced.vert", "Shaders/ParticlesInstanced.frag", nullptr);
 	shaderMap_->initialize(Shaders::MESH, "Shaders/Mesh.vert", "Shaders/Mesh.frag", nullptr);
 	shaderMap_->initialize(Shaders::EXPLOSION, "Shaders/Explosion.vert", "Shaders/Explosion.frag", nullptr);
 	shaderMap_->initialize(Shaders::HEALTH_BAR, "Shaders/HealthBar.vert", "Shaders/HealthBar.frag", nullptr);
 	shaderMap_->initialize(Shaders::SHELL, "Shaders/Shell.vert", "Shaders/Shell.frag", nullptr);
 
-	GLuint key;
-	glGenVertexArrays(1, &key);
-	glBindVertexArray(key);
-	bodyBuffer_ = new Buffer(key, 7);
+	bodyBuffer_ = new MasterBuffer(8);
 
-	//Position buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, positionBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	SlaveBuffer* positionBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, positionBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(0, positionBuffer, "position", 2, true);
 
-	//Scale buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, scaleBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	SlaveBuffer* scaleBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, scaleBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(1, scaleBuffer, "scale", 1, true);
 
-	//Rotation buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, rotationBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	SlaveBuffer* rotationBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, rotationBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(2, rotationBuffer, "rotation", 1, true);
 
-	//Highlight buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, highlightBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	SlaveBuffer* highlightBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, highlightBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(3, highlightBuffer, "highlight", 1, true);
 
-	//Resolution buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, resolutionBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(4);
-	glVertexAttribIPointer(4, 1, GL_INT, 0, NULL);
+	SlaveBuffer* resolutionBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, resolutionBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(4, resolutionBuffer, "resolution", 1, false);
 
-	//Resolution buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, contrastBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	SlaveBuffer* contrastBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, contrastBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(5, contrastBuffer, "contrast", 1, true);
 
-	//Resolution buffer
-	glGenBuffers(1, &key);
-	bodyBuffer_->AddBuffer(key);
-	glBindBuffer(GL_ARRAY_BUFFER, key);
-	glBufferData(GL_ARRAY_BUFFER, offsetBuffer_.getMemoryUse(), 0, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	SlaveBuffer* offsetBuffer = new SlaveBuffer(GL_ARRAY_BUFFER, offsetBuffer_.getMemoryCapacity(), nullptr);
+	bodyBuffer_->AddBuffer(6, offsetBuffer, "offset", 2, true);
 
 	for(Asteroid* asteroid = scene->asteroids_.getStart(); asteroid != scene->asteroids_.getEnd(); ++asteroid)
 		if(asteroid->isValid_)
@@ -159,6 +117,11 @@ void Renderer::Initialize(Scene* scene)
 	Perlin::generate(true, result, Range(0.0f, 1.0f), 3.0f, 1.5f, 0.5f, 4.0f);
 	perlinTexture_ = new Texture();
 	perlinTexture_->Upload(&result, GL_R32F, GL_RED, GL_FLOAT);
+
+	/*frameBuffers_->get(Framebuffers::DEFAULT).bindBuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+	glClearDepth(1.0f);*/
 }
 
 void Renderer::DrawScene(Scene* scene)
@@ -169,10 +132,10 @@ void Renderer::DrawScene(Scene* scene)
 	glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 1.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 	matrix_ = projectionMatrix * viewMatrix;
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LEQUAL);
-	glDepthRange(0.0f, 1.0f);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthMask(GL_TRUE);
+	//glDepthFunc(GL_LEQUAL);
+	//glDepthRange(0.0f, 1.0f);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_SAMPLE_SHADING);
 	glEnable(GL_BLEND);
@@ -195,7 +158,7 @@ void Renderer::DrawScene(Scene* scene)
 		{
 			*positionBuffer_.allocate() = asteroid->transform_->position_;
 			*scaleBuffer_.allocate() = asteroid->GetTransform()->scale_ * 2.0f;
-			*rotationBuffer_.allocate() = asteroid->transform_->rotation_.z;
+			*rotationBuffer_.allocate() = asteroid->transform_->rotation_;
 			*highlightBuffer_.allocate() = asteroid == scene->ownShip_->sensor_.GetObject() ? 1.0f : 0.0f;
 			*resolutionBuffer_.allocate() = 16 + int((asteroid->GetTransform()->scale_ - 1.0f) * 16.0f);
 			count++;
@@ -205,33 +168,27 @@ void Renderer::DrawScene(Scene* scene)
 		{
 			*positionBuffer_.allocate() = planet->transform_->position_;
 			*scaleBuffer_.allocate() = planet->GetTransform()->scale_;
-			*rotationBuffer_.allocate() = planet->transform_->rotation_.z;
+			*rotationBuffer_.allocate() = planet->transform_->rotation_;
 			*highlightBuffer_.allocate() = 0.0f;
 			*resolutionBuffer_.allocate() = 64;
 			count++;
 		}
 
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(0));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, positionBuffer_.getMemorySize(), positionBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(1));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, scaleBuffer_.getMemorySize(), scaleBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(2));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, rotationBuffer_.getMemorySize(), rotationBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(3));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, highlightBuffer_.getMemorySize(), highlightBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(4));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, resolutionBuffer_.getMemorySize(), resolutionBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(5));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, contrastBuffer_.getMemorySize(), contrastBuffer_.getStart());
-	glBindBuffer(GL_ARRAY_BUFFER, bodyBuffer_->GetKey(6));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, offsetBuffer_.getMemorySize(), offsetBuffer_.getStart());
+	//bodyBuffer_->GetBuffer("position")->UploadData(positionBuffer_.getStart(), positionBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("position", positionBuffer_.getStart(), positionBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("scale", scaleBuffer_.getStart(), scaleBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("rotation", rotationBuffer_.getStart(), rotationBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("highlight", highlightBuffer_.getStart(), highlightBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("resolution", resolutionBuffer_.getStart(), resolutionBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("contrast", contrastBuffer_.getStart(), contrastBuffer_.getMemorySize());
+	bodyBuffer_->UploadData("offset", offsetBuffer_.getStart(), offsetBuffer_.getMemorySize());
 
 	shaderMap_->use(Shaders::BODY);
 	glUniformMatrix4fv(0, 1, GL_FALSE, &matrix_[0][0]);
 	perlinTexture_->Bind(0, &shaderMap_->get(Shaders::BODY), "alpha");
-	glBindVertexArray(bodyBuffer_->GetKey());
+	bodyBuffer_->Bind();
 	glDrawArrays(GL_POINTS, 0, count);
-	glBindVertexArray(0);
+	bodyBuffer_->Unbind();
 	shaderMap_->unuse(Shaders::BODY);
 
 	shaderMap_->use(Shaders::MESH);
@@ -253,9 +210,9 @@ void Renderer::DrawScene(Scene* scene)
 	shaderMap_->use(Shaders::SHELL);
 	for(Shell* shell = scene->shells_.getStart(); shell != scene->shells_.getEnd(); ++shell)
 		if(shell->isValid_) {
-			glUniform1f(2, shell->GetTransform()->scale_);
+			glUniform1f(2, shell->GetTransform()->scale_ * 2.0f);
 			float speed = glm::length(shell->GetRigidBody()->velocity_);
-			speed *= speed * 10.0f;
+			speed *= speed * 15.0f;
 			if(speed > 1.0f)
 				speed = 1.0f;
 			glUniform1f(4, speed);
@@ -272,6 +229,8 @@ void Renderer::DrawScene(Scene* scene)
 			explosion->Draw(matrix_);
 		}
 	shaderMap_->unuse(Shaders::EXPLOSION);
+
+	//ParticleManager::Render(matrix_);
 }
 
 void Renderer::DrawInterface(Interface* interface)

@@ -58,7 +58,7 @@ void GameObject::updateGravity() {
 }
 
 void GameObject::Draw(Matrix &finalMatrix) {
-	Matrix worldMatrix = glm::translate(Matrix(1.0f), GetWorldPosition()) * glm::rotate(Matrix(1.0f), GetWorldRotation().z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	Matrix worldMatrix = glm::translate(Matrix(1.0f), glm::vec3(GetWorldPosition(), 0.0f)) * glm::rotate(Matrix(1.0f), GetWorldRotation(), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	mesh_->draw(finalMatrix, worldMatrix);
 
 	OnDraw(finalMatrix, worldMatrix);
@@ -105,7 +105,7 @@ Position GameObject::GetWorldPosition()
 	{
 		if(parent)
 		{
-			float rotation = parent->transform_->rotation_.z;
+			float rotation = parent->transform_->rotation_;
 			float s = sin(rotation);
 			float c = cos(rotation);
 
@@ -155,7 +155,7 @@ Matrix GameObject::GetWorldPositionMatrix()
 	Position position = GetWorldPosition();
 
 	Matrix modelMatrix =
-		glm::translate(Matrix(1.0f), position) *
+		glm::translate(Matrix(1.0f), glm::vec3(position, 0.0f)) *
 		glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
 	return modelMatrix;

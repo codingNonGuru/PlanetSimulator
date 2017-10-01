@@ -9,6 +9,7 @@
 #define GAMEOBJECT_HPP_
 
 #include <glm.hpp>
+#include "Conventions.hpp"
 
 class Mesh;
 class Transform;
@@ -18,9 +19,6 @@ class Scene;
 class Weapon;
 class Collider;
 class Collision;
-typedef glm::mat4 Matrix;
-typedef glm::vec3 Position;
-typedef glm::vec3 Rotation;
 
 class GameObject {
 public:

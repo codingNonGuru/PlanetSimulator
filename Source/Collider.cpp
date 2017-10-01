@@ -94,8 +94,8 @@ void Collider::Resolve(GameObject* otherObject)
 
 		Position vertices[3];
 		Direction directions[3];
-		float sine = sin(meshTransform->rotation_.z);
-		float cosine = cos(meshTransform->rotation_.z);
+		float sine = sin(meshTransform->rotation_);
+		float cosine = cos(meshTransform->rotation_);
 		for(int i = 0; i < mesh->elementCount_; i += 3)
 		{
 			for(int j = i; j < i + 3; ++j)
@@ -107,7 +107,7 @@ void Collider::Resolve(GameObject* otherObject)
 				y *= meshTransform->scale_;
 				x += meshTransform->position_.x;
 				y += meshTransform->position_.y;
-				vertices[j - i] = Position(x, y, 0.0f);
+				vertices[j - i] = Position(x, y);
 			}
 			bool isFirstInside = false;
 			bool isSecondInside = false;
@@ -116,8 +116,8 @@ void Collider::Resolve(GameObject* otherObject)
 			directions[1] = vertices[2] - vertices[1];
 			directions[2] = pointPosition - vertices[1];
 			{
-				Direction first = glm::cross(directions[0], directions[2]);
-				Direction second = glm::cross(directions[1], directions[2]);
+				glm::vec3 first = glm::cross(glm::vec3(directions[0], 0.0f), glm::vec3(directions[2], 0.0f));
+				glm::vec3 second = glm::cross(glm::vec3(directions[1], 0.0f), glm::vec3(directions[2], 0.0f));
 				if(first.z * second.z < 0.0f)
 					isFirstInside = true;
 			}
@@ -126,8 +126,8 @@ void Collider::Resolve(GameObject* otherObject)
 			directions[1] = vertices[1] - vertices[2];
 			directions[2] = pointPosition - vertices[2];
 			{
-				Direction first = glm::cross(directions[0], directions[2]);
-				Direction second = glm::cross(directions[1], directions[2]);
+				glm::vec3 first = glm::cross(glm::vec3(directions[0], 0.0f), glm::vec3(directions[2], 0.0f));
+				glm::vec3 second = glm::cross(glm::vec3(directions[1], 0.0f), glm::vec3(directions[2], 0.0f));
 				if(first.z * second.z < 0.0f)
 					isSecondInside = true;
 			}

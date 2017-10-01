@@ -9,12 +9,8 @@
 #define TRANSFORM_HPP_
 
 #include <glm.hpp>
+#include "Conventions.hpp"
 
-typedef glm::vec3 Position;
-typedef glm::vec3 Rotation;
-typedef glm::vec3 Direction;
-typedef float Scale;
-typedef glm::mat4 Matrix;
 class Scene;
 
 class Transform {

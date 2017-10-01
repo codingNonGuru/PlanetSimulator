@@ -14,3 +14,10 @@ enum class Missions
 {
 	MINE, DELIVER, DEFEND, ESCORT, COUNT
 };
+
+enum class ParticleSystems
+{
+	EXPLOSION,
+	SHELL_HIT,
+	COUNT
+};

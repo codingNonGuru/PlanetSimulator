@@ -3,16 +3,44 @@
 #include "Memory.hpp"
 
 typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+
+class SlaveBuffer;
 
 class Buffer {
 public:
 	GLuint key_;
-	container::Array<Buffer> subBuffers_;
 
 	Buffer() {}
-	Buffer(GLuint, int);
-	void SetKey(GLuint key) {key_ = key;}
-	GLuint GetKey() const {return key_;}
-	GLuint GetKey(int index) const {Buffer* buffer = subBuffers_.get(index); return buffer->GetKey();}
-	void AddBuffer(GLuint);
+};
+
+class MasterBuffer : public Buffer
+{
+	container::StaticMap <SlaveBuffer*> slaveBuffers_;
+
+public:
+	MasterBuffer(int);
+	void Generate();
+	void AddBuffer(int, SlaveBuffer*, const char*, GLuint, bool);
+	void AddStorageBuffer(int, SlaveBuffer*, const char*);
+	SlaveBuffer* GetBuffer(int);
+	SlaveBuffer* GetBuffer(const char*);
+	void SetSlaveBindPoint(const char*, GLuint);
+	void UploadData(const char*, void*, GLuint);
+	void Bind();
+	void Unbind();
+};
+
+class SlaveBuffer : public Buffer
+{
+	GLenum type_;
+
+public:
+	SlaveBuffer(GLenum, int, void*);
+	GLenum GetType() const {return type_;}
+	void Generate(GLenum, int, void*);
+	void UploadData(void*, GLuint);
+	void Bind();
+	void Bind(GLuint);
+	void Unbind();
 };

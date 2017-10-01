@@ -22,6 +22,7 @@
 #include "Collider.hpp"
 #include "Explosion.hpp"
 #include "HealthBar.hpp"
+#include "ParticleManager.hpp"
 
 Ship::Ship() {}
 
@@ -43,8 +44,8 @@ void Ship::UpdateLogic() {
 		{
 			auto shell = mainScene_->shells_.allocate();
 
-			float shootAngle = transform_->rotation_.z + utility::biasedRandom(-0.1f, 0.1f, 0.0f, 0.03f);
-			Direction shootDirection(cos(shootAngle), sin(shootAngle), 0.0f);
+			float shootAngle = transform_->rotation_ + utility::biasedRandom(-0.1f, 0.1f, 0.0f, 0.03f);
+			Direction shootDirection(cos(shootAngle), sin(shootAngle));
 			float speed = utility::getRandom(0.3f, 0.32f);
 
 			Position position = transform_->position_ + shootDirection * utility::getRandom(0.2f, 0.3f);
@@ -249,6 +250,7 @@ void Shell::Collide(Collision* collision)
 		transform->position_ -= rigidBody_->velocity_ * 0.5f;
 		transform->scale_ = 2.0f;
 		explosion->Initialize(false, &Engine::meshes_[Meshes::QUAD], transform, nullptr, nullptr);
+		ParticleManager::Allocate(ParticleSystems::EXPLOSION, transform, nullptr);
 	}
 }
 

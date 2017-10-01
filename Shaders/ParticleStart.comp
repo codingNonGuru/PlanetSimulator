@@ -1,0 +1,47 @@
+#version 450
+#extension GL_ARB_compute_variable_group_size: enable
+
+layout (location = 0) uniform uint initializerCount;
+layout (location = 1) uniform uint systemSize;
+
+struct Particle
+{
+	float posx, posy;
+	float velx, vely;
+	float lifetime;
+	float decayrate;
+};
+
+struct Initializer
+{
+	uint systemIndex;
+	float posx, posy;
+};
+
+layout (std430, binding = 0) buffer PARTICLES 
+{
+	Particle particles[];
+};
+
+layout (std430, binding = 1) buffer INITIALIZERS 
+{
+	Initializer initializers[];
+};
+
+layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+
+void main()
+{
+	uint localParticleIndex = gl_GlobalInvocationID.x;
+	uint initializerIndex = localParticleIndex / systemSize;
+	uint systemIndex = initializers[initializerIndex].systemIndex;
+	uint globalParticleIndex = systemIndex * systemSize + localParticleIndex % systemSize;
+	
+	particles[globalParticleIndex].posx = initializers[initializerIndex].posx;
+	particles[globalParticleIndex].posy = initializers[initializerIndex].posy;
+	
+	//particles[globalParticleIndex].velx = 1.0f;
+	//particles[globalParticleIndex].vely = 1.0f;
+	
+	particles[globalParticleIndex].lifetime = 0.0f;
+}

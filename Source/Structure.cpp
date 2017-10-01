@@ -16,7 +16,7 @@ void Structure::SetType(StructureTypes type)
 		{
 			*ship = nullptr;
 		}
-		launchInterval_ = 30;
+		launchInterval_ = 300;
 		lastLaunch_ = launchInterval_ / 2;
 	}
 }

@@ -61,7 +61,7 @@ void Controller::ReachTarget(float minimumDistance, float maximumDistance)
 	Direction forward = parent_->GetTransform()->GetForward();
 
 	float angleFactor = glm::dot(direction, forward);
-	glm::vec3 crossProduct = glm::cross(direction, forward);
+	glm::vec3 crossProduct = glm::cross(glm::vec3(direction, 0.0f), glm::vec3(forward, 0.0f));
 
 	SetAction(Actions::STEER_LEFT, crossProduct.z > 0.0f);
 	SetAction(Actions::STEER_RIGHT, crossProduct.z < 0.0f);

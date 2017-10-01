@@ -135,19 +135,19 @@ void Mesh::initialize(Meshes mesh) {
 	}
 	else if(mesh == Meshes::SHELL)
 	{
-		vertices_[0].position_ = glm::vec2(-0.45f, 0.3f);
-		vertices_[1].position_ = glm::vec2(-0.15f, 0.3f);
-		vertices_[2].position_ = glm::vec2(-0.45f, 0.0f);
-		vertices_[3].position_ = glm::vec2(-0.15f, 0.0f);
-		vertices_[4].position_ = glm::vec2(-0.45f, -0.3f);
-		vertices_[5].position_ = glm::vec2(-0.15f, -0.3f);
+		vertices_[0].position_ = glm::vec2(-0.4f, 0.3f);
+		vertices_[1].position_ = glm::vec2(-0.1f, 0.3f);
+		vertices_[2].position_ = glm::vec2(-0.4f, 0.0f);
+		vertices_[3].position_ = glm::vec2(-0.1f, 0.0f);
+		vertices_[4].position_ = glm::vec2(-0.4f, -0.3f);
+		vertices_[5].position_ = glm::vec2(-0.1f, -0.3f);
 
-		vertices_[6].position_ = glm::vec2(0.15f, 0.3f);
-		vertices_[7].position_ = glm::vec2(0.45f, 0.3f);
-		vertices_[8].position_ = glm::vec2(0.15f, 0.0f);
-		vertices_[9].position_ = glm::vec2(0.45f, 0.0f);
-		vertices_[10].position_ = glm::vec2(0.15f, -0.3f);
-		vertices_[11].position_ = glm::vec2(0.45f, -0.3f);
+		vertices_[6].position_ = glm::vec2(0.1f, 0.3f);
+		vertices_[7].position_ = glm::vec2(0.4f, 0.3f);
+		vertices_[8].position_ = glm::vec2(0.1f, 0.0f);
+		vertices_[9].position_ = glm::vec2(0.4f, 0.0f);
+		vertices_[10].position_ = glm::vec2(0.1f, -0.3f);
+		vertices_[11].position_ = glm::vec2(0.4f, -0.3f);
 
 		vertices_[0].coordinates_ = glm::vec2(-1.0f, 1.0f);
 		vertices_[1].coordinates_ = glm::vec2(0.0f, 1.0f);

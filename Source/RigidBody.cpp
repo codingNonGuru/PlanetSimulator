@@ -34,7 +34,7 @@ void RigidBody::Initialize(GameObject* parent, float mass, float drag)
 	drag_ = drag;
 	angularDrag_ = 0.95f;
 	mass_ = mass;
-	velocity_ = Direction(0.0f, 0.0f, 0.0f);
+	velocity_ = Direction(0.0f, 0.0f);
 }
 
 RigidBody* RigidBody::Allocate(Scene* scene, GameObject* parent, float mass, float drag)
@@ -46,9 +46,9 @@ RigidBody* RigidBody::Allocate(Scene* scene, GameObject* parent, float mass, flo
 
 void RigidBody::update(Transform* transform) {
 	transform->position_ += velocity_;
-	transform->rotation_.z += angularMomentum_;
-	if(transform->rotation_.z > 6.2831f)
-		transform->rotation_.z -= 6.2831f;
+	transform->rotation_ += angularMomentum_;
+	if(transform->rotation_ > 6.2831f)
+		transform->rotation_ -= 6.2831f;
 	velocity_ *= drag_;
 	angularMomentum_ *= angularDrag_;
 }
@@ -58,7 +58,7 @@ void RigidBody::updateGravity(GameObject* parent) {
 	{
 		if(planet->isValid_ && planet != parent)
 		{
-			glm::vec3 direction = planet->transform_->position_ - parent->transform_->position_;
+			Direction direction = planet->transform_->position_ - parent->transform_->position_;
 			float distance = glm::length(direction);
 			//velocity_ += (direction * mass_ * planet->GetRigidBody()->mass_) / (distance * distance * distance);
 			velocity_ += (direction * mass_ * gravityConstant_) / (distance * distance * distance);
@@ -92,7 +92,7 @@ void RigidBody::AddOrbitalVelocity(GameObject* attractor)
 	Direction direction = parent_->transform_->position_ - attractor->GetTransform()->position_;
 	float distance = glm::length(direction);
 	Direction orbitalVelocity = direction / distance;
-	velocity_ += glm::vec3(orbitalVelocity.y, -orbitalVelocity.x, 0.0f) * sqrt(gravityConstant_ * mass_ / distance);
+	velocity_ += Direction(orbitalVelocity.y, -orbitalVelocity.x) * sqrt(gravityConstant_ * mass_ / distance);
 }
 
 RigidBody::~RigidBody() {
