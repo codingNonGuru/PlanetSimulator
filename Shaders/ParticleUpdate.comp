@@ -14,14 +14,28 @@ layout (std430, binding = 0) buffer PARTICLES
 	Particle particles[];
 };
 
+uniform sampler2D distortion;
+
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
 void main() 
 {
-	const float deltaTime = 0.15f;
+	const float deltaTime = 0.01f;
 	uint index = gl_GlobalInvocationID.x;
+	
+	float x = particles[index].posx;
+	float y = particles[index].posy;
+	
+	float distortionValue = texture(distortion, vec2(x * 0.01f, y * 0.01f)).r * 6.2831f * 2.0f;
+	
+	particles[index].velx += cos(distortionValue);
+	particles[index].vely += sin(distortionValue);
+	
+	particles[index].velx *= 0.99f;
+	particles[index].vely *= 0.99f;
+	
 	particles[index].posx += particles[index].velx * deltaTime;
 	particles[index].posy += particles[index].vely * deltaTime;
-	particles[index].lifetime += 0.1f;// * particles[index].decayrate; 
+	particles[index].lifetime += 0.1f; 
 	//velocities[index] *= 0.995f;
 }

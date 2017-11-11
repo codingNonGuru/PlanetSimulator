@@ -3,6 +3,9 @@
 
 layout (location = 0) uniform uint initializerCount;
 layout (location = 1) uniform uint systemSize;
+layout (location = 2) uniform uint randomStreamSize;
+layout (location = 3) uniform uint angleSeed;
+layout (location = 4) uniform uint radiusSeed;
 
 struct Particle
 {
@@ -28,7 +31,24 @@ layout (std430, binding = 1) buffer INITIALIZERS
 	Initializer initializers[];
 };
 
+layout (std430, binding = 2) buffer RANDOM_STREAM 
+{
+	float randomStream[];
+};
+
+uniform sampler2D distortion;
+
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+
+uint ShuffleBits(uint seed) 
+{
+	seed = (seed ^ 61) ^ (seed >> 16);
+    seed *= 9;
+    seed = seed ^ (seed >> 4);
+    seed *= 0x27d4eb2d;
+    seed = seed ^ (seed >> 15);
+    return seed;
+}
 
 void main()
 {
@@ -37,11 +57,24 @@ void main()
 	uint systemIndex = initializers[initializerIndex].systemIndex;
 	uint globalParticleIndex = systemIndex * systemSize + localParticleIndex % systemSize;
 	
-	particles[globalParticleIndex].posx = initializers[initializerIndex].posx;
-	particles[globalParticleIndex].posy = initializers[initializerIndex].posy;
+	uint randomIndex = globalParticleIndex + systemIndex + angleSeed;
+	randomIndex = ShuffleBits(randomIndex) % randomStreamSize;
+	float angle = randomStream[randomIndex] * 6.2831f;
 	
-	//particles[globalParticleIndex].velx = 1.0f;
-	//particles[globalParticleIndex].vely = 1.0f;
+	randomIndex = globalParticleIndex + systemIndex + radiusSeed;
+	randomIndex = ShuffleBits(randomIndex) % randomStreamSize;
+	float radius = randomStream[randomIndex] * 0.1f + 0.9f;
+	
+	float x = initializers[initializerIndex].posx + cos(angle) * radius;
+	float y = initializers[initializerIndex].posy + sin(angle) * radius;
+	
+	float distortionValue = texture(distortion, vec2(x * 0.01f, y * 0.01f)).r * 6.2831f * 2.0f;
+	
+	particles[globalParticleIndex].posx = x;
+	particles[globalParticleIndex].posy = y;
+	
+	particles[globalParticleIndex].velx = cos(angle + distortionValue);
+	particles[globalParticleIndex].vely = sin(angle + distortionValue);
 	
 	particles[globalParticleIndex].lifetime = 0.0f;
 }

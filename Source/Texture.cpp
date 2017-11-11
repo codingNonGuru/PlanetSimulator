@@ -17,11 +17,17 @@ void Texture::Initialize(GLuint key, glm::vec2 size) {
 	size_ = size;
 }
 
-void Texture::Bind(GLuint index, Shader* shader, const char* name) {
+void Texture::Bind(GLuint index, Shader* shader, const char* name)
+{
 	GLuint location = shader->GetTextureLocation(name);
 	glUniform1i(location, index);
 	glActiveTexture(GL_TEXTURE0 + index);
 	glBindTexture(GL_TEXTURE_2D, key_);
+}
+
+void Texture::Unbind()
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::Upload(container::Container<> *buffer, GLenum internalFormat, GLenum format, GLenum type) {

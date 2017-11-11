@@ -9,6 +9,7 @@
 #include "Transform.hpp"
 #include "Particle.hpp"
 #include "Utility.hpp"
+#include "Texture.hpp"
 
 // PARTICLE SYSTEM
 
@@ -93,12 +94,14 @@ void ParticleSystemArray::Update()
 {
 	updateShader_->use();
 	particleBuffer_->Bind(0);
+	ParticleManager::GetDistortionMap()->Bind(0, updateShader_, "distortion");
 	glUniform1ui(0, uploadQueue_.getSize());
 	glUniform1ui(1, systemSize_);
 	glDispatchCompute(particleCount_ / 16, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	glFinish();
 	particleBuffer_->Unbind();
+	ParticleManager::GetDistortionMap()->Unbind();
 	updateShader_->unuse();
 
 	for(auto system = particleSystems_.getStart(); system != particleSystems_.getEnd(); ++system)
@@ -144,13 +147,21 @@ void ParticleSystemArray::UploadQueue()
 	startShader_->use();
 	particleBuffer_->Bind(0);
 	initializerBuffer_->Bind(1);
-	glUniform1ui(0, uploadQueue_.getSize());
+	auto randomStreamBuffer = ParticleManager::GetStreamBuffer();
+	randomStreamBuffer->Bind(2);
+	ParticleManager::GetDistortionMap()->Bind(0, startShader_, "distortion");
+ 	glUniform1ui(0, uploadQueue_.getSize());
 	glUniform1ui(1, systemSize_);
+	glUniform1ui(2, randomStreamBuffer->GetSize());
+	glUniform1ui(3, utility::getRandom(0, 100000000));
+	glUniform1ui(4, utility::getRandom(0, 100000000));
 	glDispatchCompute(uploadQueue_.getSize() * systemSize_ / 16, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	glFinish();
 	particleBuffer_->Unbind();
 	initializerBuffer_->Unbind();
+	randomStreamBuffer->Unbind();
+	ParticleManager::GetDistortionMap()->Unbind();
 	startShader_->unuse();
 
 	uploadQueue_.reset();

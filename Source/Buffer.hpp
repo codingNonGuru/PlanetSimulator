@@ -34,6 +34,7 @@ public:
 class SlaveBuffer : public Buffer
 {
 	GLenum type_;
+	unsigned int size_;
 
 public:
 	SlaveBuffer(GLenum, int, void*);
@@ -43,4 +44,6 @@ public:
 	void Bind();
 	void Bind(GLuint);
 	void Unbind();
+	void SetSize(unsigned int size) {size_ = size;}
+	unsigned int GetSize() const {return size_;}
 };

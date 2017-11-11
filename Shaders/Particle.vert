@@ -35,5 +35,5 @@ void main()
 	gl_Position = finalMatrix * vec4(x, y, 0.0f, 1.0f);
 	
 	float lifetime = particles[instanceIndex].lifetime; 
-	alpha = exp(-(lifetime * lifetime) / 4.0f);
+	alpha = exp(-(lifetime * lifetime) / 64.0f);
 }

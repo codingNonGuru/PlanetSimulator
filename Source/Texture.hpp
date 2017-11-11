@@ -22,6 +22,8 @@ public:
 
 	void Bind(GLuint, Shader*, const char*);
 
+	void Unbind();
+
 	void Upload(container::Container<>*, GLenum, GLenum, GLenum);
 
 	void Delete();

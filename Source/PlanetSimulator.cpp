@@ -222,16 +222,17 @@ int main(int argc, char* argv[]) {
 
 	initializeSystem();
 	EventHandler::Initialize();
-	//ParticleManager::Initialize();
+	ParticleManager::Initialize();
 
-	while(Engine::IsRunning()){
+	while(Engine::IsRunning())
+	{
 		EventHandler::update();
 
 		mainScene.UpdateCollisions();
 		mainScene.UpdateLogic();
 
-		//ParticleManager::FlushQueue();
-		//ParticleManager::Update();
+		ParticleManager::FlushQueue();
+		ParticleManager::Update();
 
 		for(int i = 0; i < 1; ++i)
 			mainScene.UpdatePhysics();

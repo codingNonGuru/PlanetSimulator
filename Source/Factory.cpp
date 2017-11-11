@@ -39,7 +39,7 @@ Ship* ShipFactory::Produce(bool isPlayer, ShipTypes shipType, Transform* transfo
 		ship->Initialize(isPlayer, mesh, transform, rigidBody, nullptr);
 
 		auto weapon = ship->GetWeapon();
-		weapon->initialize(0.005f, 20.0f, 0.9f);
+		weapon->initialize(0.05f, 20.0f, 0.9f);
 
 		auto hull = ship->GetHull();
 		hull->Initialize(1.0f);

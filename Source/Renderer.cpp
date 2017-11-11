@@ -29,7 +29,7 @@ container::Array <glm::vec2> Renderer::offsetBuffer_ = container::Array <glm::ve
 MasterBuffer* Renderer::bodyBuffer_ = nullptr;
 ShaderMap* Renderer::shaderMap_ = new ShaderMap();
 glm::mat4 Renderer::matrix_ = glm::mat4();
-float Renderer::zoomFactor_ = 0.3f;
+float Renderer::zoomFactor_ = 0.03f;
 Texture* Renderer::perlinTexture_ = nullptr;
 FramebufferAtlas* Renderer::frameBuffers_ = new FramebufferAtlas();
 
@@ -230,7 +230,7 @@ void Renderer::DrawScene(Scene* scene)
 		}
 	shaderMap_->unuse(Shaders::EXPLOSION);
 
-	//ParticleManager::Render(matrix_);
+	ParticleManager::Render(matrix_);
 }
 
 void Renderer::DrawInterface(Interface* interface)
